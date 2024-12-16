@@ -24,7 +24,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(Player.class)
 public interface PlayerEntityAccessor {
-    @Accessor("PLAYER_MODEL_PARTS")
+    @Accessor("DATA_PLAYER_MODE_CUSTOMISATION")
     static EntityDataAccessor<Byte> getPlayerModelParts() {
         throw new IllegalStateException();
     }

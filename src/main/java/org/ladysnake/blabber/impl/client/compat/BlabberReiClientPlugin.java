@@ -17,6 +17,7 @@
  */
 package org.ladysnake.blabber.impl.client.compat;
 
+/*
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.forge.REIPluginClient;
@@ -28,3 +29,4 @@ public class BlabberReiClientPlugin implements REIClientPlugin {
         registry.registerDecider(new BlabberOverlayDecider());
     }
 }
+ */

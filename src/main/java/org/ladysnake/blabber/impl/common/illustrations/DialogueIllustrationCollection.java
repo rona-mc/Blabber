@@ -38,14 +38,14 @@ public record DialogueIllustrationCollection(List<DialogueIllustration> elements
     public static final DialogueIllustrationType<DialogueIllustrationCollection> TYPE = new DialogueIllustrationType<>(
             CODEC,
             buf -> new DialogueIllustrationCollection(buf.readList(b -> {
-                DialogueIllustrationType<?> type = b.readRegistryValue(BlabberRegistrar.ILLUSTRATION_REGISTRY);
+                DialogueIllustrationType<?> type = b.readById(BlabberRegistrar.ILLUSTRATION_REGISTRY);
                 assert type != null;
                 return type.readFromPacket(b);
             })),
             (buf, item) ->
                 buf.writeCollection(item.elements, (b, i) -> {
                     // Write the type, then the packet itself.
-                    b.writeRegistryValue(BlabberRegistrar.ILLUSTRATION_REGISTRY, i.getType());
+                    b.writeId(BlabberRegistrar.ILLUSTRATION_REGISTRY, i.getType());
                     i.getType().writeToPacketUnsafe(b, i);
                 })
     );

@@ -45,20 +45,20 @@ public record DialogueTemplate(String start, boolean unskippable, Map<String, Di
     ).apply(instance, DialogueTemplate::new));
 
     public static void writeToPacket(FriendlyByteBuf buf, DialogueTemplate dialogue) {
-        buf.writeString(dialogue.start());
+        buf.writeUtf(dialogue.start());
         buf.writeBoolean(dialogue.unskippable());
-        buf.writeMap(dialogue.states(), FriendlyByteBuf::writeString, DialogueState::writeToPacket);
-        buf.writeMap(dialogue.illustrations(), FriendlyByteBuf::writeString, (b, i) -> {
+        buf.writeMap(dialogue.states(), FriendlyByteBuf::writeUtf, DialogueState::writeToPacket);
+        buf.writeMap(dialogue.illustrations(), FriendlyByteBuf::writeUtf, (b, i) -> {
             // Write the type, then the packet itself.
-            b.writeRegistryValue(BlabberRegistrar.ILLUSTRATION_REGISTRY, i.getType());
+            b.writeId(BlabberRegistrar.ILLUSTRATION_REGISTRY, i.getType());
             i.getType().writeToPacketUnsafe(b, i);
         });
         DialogueLayoutType.writeToPacket(buf, dialogue.layout());
     }
 
     public DialogueTemplate(FriendlyByteBuf buf) {
-        this(buf.readString(), buf.readBoolean(), buf.readMap(FriendlyByteBuf::readString, DialogueState::new), buf.readMap(FriendlyByteBuf::readString, b -> {
-            DialogueIllustrationType<?> type = b.readRegistryValue(BlabberRegistrar.ILLUSTRATION_REGISTRY);
+        this(buf.readUtf(), buf.readBoolean(), buf.readMap(FriendlyByteBuf::readUtf, DialogueState::new), buf.readMap(FriendlyByteBuf::readUtf, b -> {
+            DialogueIllustrationType<?> type = b.readById(BlabberRegistrar.ILLUSTRATION_REGISTRY);
             assert type != null;
             return type.readFromPacket(b);
         }), DialogueLayoutType.readFromPacket(buf));

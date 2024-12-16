@@ -17,7 +17,7 @@
  */
 package org.ladysnake.blabber.impl.client.compat;
 
-import net.fabricmc.loader.api.FabricLoader;
+//import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 public class BlabberClientMixinPlugin implements IMixinConfigPlugin {
     private static final String COMPAT_PREFIX = "org.ladysnake.blabber.mixin.client.compat.";
     private static final Pattern COMPAT_MIXIN_PATTERN = Pattern.compile(Pattern.quote(COMPAT_PREFIX) + "(?<modid>[a-z_]+?)\\..*");
-    private final FabricLoader loader = FabricLoader.getInstance();
+    private final FabricLoader loader = FabricLoader.getInstance(); // TODO
 
     @Override
     public void onLoad(String mixinPackage) {
@@ -49,7 +49,7 @@ public class BlabberClientMixinPlugin implements IMixinConfigPlugin {
         Matcher matcher = COMPAT_MIXIN_PATTERN.matcher(mixinClassName);
         if (!matcher.matches()) throw new IllegalStateException("Bad compat mixin name " + mixinClassName);
         String modId = matcher.group("modid");
-        return loader.isModLoaded(modId);
+        return loader.isModLoaded(modId); // TODO
     }
 
     @Override

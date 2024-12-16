@@ -18,8 +18,8 @@
 package org.ladysnake.blabber.impl.client.illustrations;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+//import net.fabricmc.api.EnvType;
+//import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -46,10 +46,10 @@ public abstract class EntityIllustrationRenderer<I extends DialogueIllustrationE
     protected abstract @Nullable LivingEntity getRenderedEntity(Level world);
 
     @Override
-    @Environment(EnvType.CLIENT)
+    @Environment(EnvType.CLIENT) // TODO
     public void render(GuiGraphics context, Font textRenderer, PositionTransform positionTransform, int mouseX, int mouseY, float tickDelta) {
         LivingEntity e = this.renderedEntity == null
-                ? this.renderedEntity = this.getRenderedEntity(Minecraft.getInstance().world)
+                ? this.renderedEntity = this.getRenderedEntity(Minecraft.getInstance().level)
                 : this.renderedEntity;
 
         if (e == null) return; // Something went wrong creating the entity, so don't render.
@@ -63,7 +63,7 @@ public abstract class EntityIllustrationRenderer<I extends DialogueIllustrationE
         int fakedMouseX = stareTarget.x().isPresent() ? stareTarget.anchor().isPresent() ? positionTransform.transformX(stareTarget.anchor().get(), stareTarget.x().getAsInt()) : stareTarget.x().getAsInt() + (x1 + x2) / 2 : mouseX;
         int fakedMouseY = stareTarget.y().isPresent() ? stareTarget.anchor().isPresent() ? positionTransform.transformY(stareTarget.anchor().get(), stareTarget.y().getAsInt()) : stareTarget.y().getAsInt() + (y1 + y2) / 2 : mouseY;
 
-        drawEntity(context,
+        renderEntityInInventory(context,
                 x1,
                 y1,
                 x2,
@@ -76,57 +76,55 @@ public abstract class EntityIllustrationRenderer<I extends DialogueIllustrationE
     }
 
     // Copy-pasted from MC 1.20.4 InventoryScreen#drawEntity
-    public static void drawEntity(GuiGraphics context, int x1, int y1, int x2, int y2, int size, float f, float mouseX, float mouseY, LivingEntity entity) {
-        float g = (float)(x1 + x2) / 2.0F;
-        float h = (float)(y1 + y2) / 2.0F;
-        context.enableScissor(x1, y1, x2, y2);
-        float i = (float)Math.atan((g - mouseX) / 40.0F);
-        float j = (float)Math.atan((h - mouseY) / 40.0F);
-        Quaternionf quaternionf = (new Quaternionf()).rotateZ(3.1415927F);
-        Quaternionf quaternionf2 = (new Quaternionf()).rotateX(j * 20.0F * 0.017453292F);
-        quaternionf.mul(quaternionf2);
-        float k = entity.bodyYaw;
-        float l = entity.getYaw();
-        float m = entity.getPitch();
-        float n = entity.prevHeadYaw;
-        float o = entity.headYaw;
-        entity.bodyYaw = 180.0F + i * 20.0F;
-        entity.setYaw(180.0F + i * 40.0F);
-        entity.setPitch(-j * 20.0F);
-        entity.headYaw = entity.getYaw();
-        entity.prevHeadYaw = entity.getYaw();
-        float p = 1;
-        Vector3f vector3f = new Vector3f(0.0F, entity.getHeight() / 2.0F + f * p, 0.0F);
-        float q = (float)size / p;
-        drawEntity(context, g, h, q, vector3f, quaternionf, quaternionf2, entity);
-        entity.bodyYaw = k;
-        entity.setYaw(l);
-        entity.setPitch(m);
-        entity.prevHeadYaw = n;
-        entity.headYaw = o;
-        context.disableScissor();
+    public static void renderEntityInInventory(GuiGraphics p_282802_, int p_275688_, int p_275245_, int p_275535_, int p_301381_, int p_299741_, float p_275604_, float p_275546_, float p_300682_, LivingEntity p_275689_) {
+        float $$10 = (float)(p_275688_ + p_275535_) / 2.0F;
+        float $$11 = (float)(p_275245_ + p_301381_) / 2.0F;
+        p_282802_.enableScissor(p_275688_, p_275245_, p_275535_, p_301381_);
+        float $$12 = (float)Math.atan((double)(($$10 - p_275546_) / 40.0F));
+        float $$13 = (float)Math.atan((double)(($$11 - p_300682_) / 40.0F));
+        Quaternionf $$14 = (new Quaternionf()).rotateZ(3.1415927F);
+        Quaternionf $$15 = (new Quaternionf()).rotateX($$13 * 20.0F * 0.017453292F);
+        $$14.mul($$15);
+        float $$16 = p_275689_.yBodyRot;
+        float $$17 = p_275689_.getYRot();
+        float $$18 = p_275689_.getXRot();
+        float $$19 = p_275689_.yHeadRotO;
+        float $$20 = p_275689_.yHeadRot;
+        p_275689_.yBodyRot = 180.0F + $$12 * 20.0F;
+        p_275689_.setYRot(180.0F + $$12 * 40.0F);
+        p_275689_.setXRot(-$$13 * 20.0F);
+        p_275689_.yHeadRot = p_275689_.getYRot();
+        p_275689_.yHeadRotO = p_275689_.getYRot();
+        Vector3f $$21 = new Vector3f(0.0F, p_275689_.getBbHeight() / 2.0F + p_275604_, 0.0F);
+        renderEntityInInventory(p_282802_, $$10, $$11, p_299741_, $$21, $$14, $$15, p_275689_);
+        p_275689_.yBodyRot = $$16;
+        p_275689_.setYRot($$17);
+        p_275689_.setXRot($$18);
+        p_275689_.yHeadRotO = $$19;
+        p_275689_.yHeadRot = $$20;
+        p_282802_.disableScissor();
     }
 
-    public static void drawEntity(GuiGraphics context, float x, float y, float size, Vector3f vector3f, Quaternionf quaternionf, @Nullable Quaternionf quaternionf2, LivingEntity entity) {
-        context.getMatrices().push();
-        context.getMatrices().translate(x, y, 50.0);
-        context.getMatrices().multiplyPositionMatrix((new Matrix4f()).scaling(size, size, -size));
-        context.getMatrices().translate(vector3f.x, vector3f.y, vector3f.z);
-        context.getMatrices().multiply(quaternionf);
-        Lighting.method_34742();
-        EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
-        if (quaternionf2 != null) {
-            quaternionf2.conjugate();
-            entityRenderDispatcher.setRotation(quaternionf2);
+    public static void renderEntityInInventory(GuiGraphics p_282665_, float p_300023_, float p_301239_, int p_283622_, Vector3f p_298037_, Quaternionf p_281880_, @javax.annotation.Nullable Quaternionf p_282882_, LivingEntity p_282466_) {
+        p_282665_.pose().pushPose();
+        p_282665_.pose().translate((double)p_300023_, (double)p_301239_, 50.0);
+        p_282665_.pose().mulPoseMatrix((new Matrix4f()).scaling((float)p_283622_, (float)p_283622_, (float)(-p_283622_)));
+        p_282665_.pose().translate(p_298037_.x, p_298037_.y, p_298037_.z);
+        p_282665_.pose().mulPose(p_281880_);
+        Lighting.setupForEntityInInventory();
+        EntityRenderDispatcher $$8 = Minecraft.getInstance().getEntityRenderDispatcher();
+        if (p_282882_ != null) {
+            p_282882_.conjugate();
+            $$8.overrideCameraOrientation(p_282882_);
         }
 
-        entityRenderDispatcher.setRenderShadows(false);
+        $$8.setRenderShadow(false);
         RenderSystem.runAsFancy(() -> {
-            entityRenderDispatcher.render(entity, 0.0, 0.0, 0.0, 0.0F, 1.0F, context.getMatrices(), context.getVertexConsumers(), 15728880);
+            $$8.render(p_282466_, 0.0, 0.0, 0.0, 0.0F, 1.0F, p_282665_.pose(), p_282665_.bufferSource(), 15728880);
         });
-        context.draw();
-        entityRenderDispatcher.setRenderShadows(true);
-        context.getMatrices().pop();
-        Lighting.enableGuiDepthLighting();
+        p_282665_.flush();
+        $$8.setRenderShadow(true);
+        p_282665_.pose().popPose();
+        Lighting.setupFor3DItems();
     }
 }

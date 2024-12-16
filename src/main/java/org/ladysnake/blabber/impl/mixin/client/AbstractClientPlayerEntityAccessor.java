@@ -25,5 +25,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(AbstractClientPlayer.class)
 public interface AbstractClientPlayerEntityAccessor {
     @Accessor
-    void setPlayerListEntry(PlayerInfo playerListEntry);
+    void setPlayerInfo(PlayerInfo playerInfo);
 }

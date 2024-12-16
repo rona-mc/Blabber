@@ -19,7 +19,7 @@ package org.ladysnake.blabber.impl.common.commands;
 
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import me.lucko.fabric.api.permissions.v0.Permissions;
+//import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.chat.Component;
@@ -35,6 +35,7 @@ import static net.minecraft.commands.Commands.literal;
 public final class SettingsSubCommand {
     public static final String SETTINGS_SUBCOMMAND = "settings";
     public static final String SETTINGS_SET_SUBCOMMAND = "set";
+    // TODO
     public static final @NotNull Predicate<CommandSourceStack> ALLOW_DEBUG = Permissions.require("dialogue.debug", 2);
 
     static LiteralArgumentBuilder<CommandSourceStack> settingsSubtree() {
@@ -43,14 +44,14 @@ public final class SettingsSubCommand {
                 .then(literal(SETTINGS_SET_SUBCOMMAND).then(
                         argument("setting", SettingArgumentType.setting())
                                 .then(argument("value", BoolArgumentType.bool())
-                                        .executes(context -> setEnabled(context.getSource(), context.getSource().getPlayerOrThrow(), SettingArgumentType.getSetting(context, "setting"), BoolArgumentType.getBool(context, "value")))
+                                        .executes(context -> setEnabled(context.getSource(), context.getSource().getPlayer(), SettingArgumentType.getSetting(context, "setting"), BoolArgumentType.getBool(context, "value")))
                                 )
                 ));
     }
 
     private static int setEnabled(CommandSourceStack source, ServerPlayer player, BlabberSetting setting, boolean enabled) {
         BlabberSettingsComponent.get(player).setEnabled(setting, enabled);
-        source.sendFeedback(() -> Component.translatable(enabled ? "blabber:commands.setting.enabled" : "blabber:commands.setting.disabled", setting.id()), false);
+        source.sendSuccess(() -> Component.translatable(enabled ? "blabber:commands.setting.enabled" : "blabber:commands.setting.disabled", setting.id()), false);
         return 1;
     }
 }

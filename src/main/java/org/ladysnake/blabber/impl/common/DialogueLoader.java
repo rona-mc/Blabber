@@ -22,11 +22,11 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.mojang.serialization.JsonOps;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
-import net.fabricmc.fabric.api.resource.SimpleResourceReloadListener;
+//import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+//import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+//import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+//import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
+//import net.fabricmc.fabric.api.resource.SimpleResourceReloadListener;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.PackType;
@@ -51,7 +51,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-
+// TODO
 public final class DialogueLoader implements SimpleResourceReloadListener<Map<ResourceLocation, DialogueTemplate>>, ServerLifecycleEvents.EndDataPackReload {
     public static final String BLABBER_DIALOGUES_PATH = "blabber/dialogues";
     public static final ResourceLocation ID = Blabber.id("dialogue_loader");
@@ -59,16 +59,16 @@ public final class DialogueLoader implements SimpleResourceReloadListener<Map<Re
 
     public static void init() {
         DialogueLoader instance = new DialogueLoader();
-        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(instance);
-        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register(instance);
+        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(instance); // TODO
+        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register(instance); // TODO
     }
 
     @Override
     public CompletableFuture<Map<ResourceLocation, DialogueTemplate>> load(ResourceManager manager, ProfilerFiller profiler, Executor executor) {
         return CompletableFuture.supplyAsync(() -> {
             Map<ResourceLocation, DialogueTemplate> data = new HashMap<>();
-            manager.findResources(BLABBER_DIALOGUES_PATH, (res) -> res.getPath().endsWith(".json")).forEach((location, resource) -> {
-                try (Reader in = new InputStreamReader(resource.getInputStream())) {
+            manager.listResources(BLABBER_DIALOGUES_PATH, (res) -> res.getPath().endsWith(".json")).forEach((location, resource) -> {
+                try (Reader in = new InputStreamReader(resource.open())) {
                     JsonObject jsonObject = GSON.fromJson(in, JsonObject.class);
                     ResourceLocation id = new ResourceLocation(location.getNamespace(), location.getPath().substring(BLABBER_DIALOGUES_PATH.length() + 1, location.getPath().length() - 5));
                     DialogueTemplate dialogue = DialogueTemplate.CODEC.parse(JsonOps.INSTANCE, jsonObject).getOrThrow(false, message -> Blabber.LOGGER.error("(Blabber) Could not parse dialogue file from {}: {}", location, message));
@@ -103,6 +103,7 @@ public final class DialogueLoader implements SimpleResourceReloadListener<Map<Re
 
     @Override
     public Collection<ResourceLocation> getFabricDependencies() {
+        // TODO
         return Set.of(ResourceReloadListenerKeys.LOOT_TABLES);  // for dialogue choice predicates
     }
 
@@ -111,8 +112,8 @@ public final class DialogueLoader implements SimpleResourceReloadListener<Map<Re
         if (success) {
             Set<ResourceLocation> dialogueIds = DialogueRegistry.getIds();
             DialogueListPacket idSyncPacket = new DialogueListPacket(dialogueIds);
-            for (ServerPlayer player : server.getPlayerManager().getPlayerList()) {
-                ServerPlayNetworking.send(player, idSyncPacket);
+            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                ServerPlayNetworking.send(player, idSyncPacket); // TODO
                 PlayerDialogueTracker.get(player).updateDialogue();
             }
         }

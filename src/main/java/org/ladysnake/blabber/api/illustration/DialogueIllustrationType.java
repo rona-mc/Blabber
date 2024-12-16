@@ -33,6 +33,7 @@ import java.util.function.Function;
  * @param <T> the DialogueIllustration type this type creates
  */
 public final class DialogueIllustrationType<T extends DialogueIllustration> {
+    // TODO
     public static final Codec<DialogueIllustration> CODEC = RecursiveCodec.of("illustration_type", self ->
             EitherCodecButGood.alternatively(
                     BlabberRegistrar.ILLUSTRATION_REGISTRY.getCodec()

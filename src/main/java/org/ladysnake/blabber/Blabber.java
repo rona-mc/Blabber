@@ -19,8 +19,8 @@ package org.ladysnake.blabber;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+//import net.fabricmc.api.ModInitializer;
+//import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.core.Registry;
@@ -48,7 +48,7 @@ import org.ladysnake.blabber.impl.common.illustrations.entity.DialogueIllustrati
 import org.ladysnake.blabber.impl.common.illustrations.entity.DialogueIllustrationSelectorEntity;
 import org.ladysnake.blabber.impl.common.machine.DialogueStateMachine;
 
-public final class Blabber implements ModInitializer {
+public final class Blabber implements ModInitializer { // TODO
 	public static final String MOD_ID = "blabber";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
@@ -62,7 +62,7 @@ public final class Blabber implements ModInitializer {
 	 * <p>This operation closes the player's {@linkplain  Player#containerMenu current screen handler},
 	 * if any, and opens a new dialogue screen instead.
 	 *
-	 * <p>A dialogue may fail to start if it contains malformed texts as per {@link net.minecraft.network.chat.ComponentUtils#parse(CommandSourceStack, Component, Entity, int)}.
+	 * <p>A dialogue may fail to start if it contains malformed texts as per {@link net.minecraft.network.chat.ComponentUtils#updateForEntity(CommandSourceStack, Component, Entity, int)}.
 	 * In that case, this method will throw a {@link DialogueInitializationException}.
 	 *
 	 * @param player the player for whom to initiate a dialogue
@@ -80,7 +80,7 @@ public final class Blabber implements ModInitializer {
 	 * <p>This operation closes the player's {@linkplain  Player#containerMenu current screen handler},
 	 * if any, and opens a new dialogue screen instead.
 	 *
-	 * <p>A dialogue may fail to start if it contains malformed texts as per {@link net.minecraft.network.chat.ComponentUtils#parse(CommandSourceStack, Component, Entity, int)}.
+	 * <p>A dialogue may fail to start if it contains malformed texts as per {@link net.minecraft.network.chat.ComponentUtils#updateForEntity(CommandSourceStack, Component, Entity, int)}.
 	 * In that case, this method will throw a {@link DialogueInitializationException}.
 	 *
 	 * @param player the player for whom to initiate a dialogue
@@ -170,7 +170,7 @@ public final class Blabber implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		BlabberRegistrar.init();
-		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> BlabberCommand.register(dispatcher));
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> BlabberCommand.register(dispatcher)); // TODO
 		registerAction(id("command"), CommandDialogueAction.CODEC);
 		registerLayout(id("classic"), BlabberRegistrar.CLASSIC_LAYOUT);
 		registerLayout(id("rpg"), BlabberRegistrar.RPG_LAYOUT);

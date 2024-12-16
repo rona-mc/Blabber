@@ -31,7 +31,7 @@ public final class BlabberScreenRegistry {
      */
     public static <P extends DialogueLayout.Params> void register(
             DialogueLayoutType<P> layoutType,
-            MenuScreens.Provider<DialogueScreenHandler, BlabberDialogueScreen<P>> screenProvider
+            MenuScreens.ScreenConstructor<DialogueScreenHandler, BlabberDialogueScreen<P>> screenProvider
     ) {
         BlabberClient.registerLayoutScreen(layoutType, screenProvider);
     }

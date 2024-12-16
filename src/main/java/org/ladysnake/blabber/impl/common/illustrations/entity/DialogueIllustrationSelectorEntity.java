@@ -171,7 +171,7 @@ public class DialogueIllustrationSelectorEntity implements DialogueIllustrationE
 
         public Spec(FriendlyByteBuf buf) {
             this(
-                    buf.readString(),
+                    buf.readUtf(),
                     buf.readEnumConstant(IllustrationAnchor.class),
                     buf.readInt(),
                     buf.readInt(),
@@ -184,7 +184,7 @@ public class DialogueIllustrationSelectorEntity implements DialogueIllustrationE
         }
 
         public void writeToBuffer(FriendlyByteBuf buf) {
-            buf.writeString(selector());
+            buf.writeUtf(selector());
             buf.writeEnumConstant(anchor());
             buf.writeInt(x());
             buf.writeInt(y());

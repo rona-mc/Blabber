@@ -89,11 +89,11 @@ public final class DialogueStateMachine {
     public static void writeToPacket(FriendlyByteBuf buf, DialogueStateMachine dialogue) {
         buf.writeIdentifier(dialogue.getId());
         DialogueTemplate.writeToPacket(buf, dialogue.template);
-        buf.writeString(dialogue.getCurrentStateKey());
+        buf.writeUtf(dialogue.getCurrentStateKey());
     }
 
     public DialogueStateMachine(FriendlyByteBuf buf) {
-        this(buf.readIdentifier(), new DialogueTemplate(buf), buf.readString());
+        this(buf.readIdentifier(), new DialogueTemplate(buf), buf.readUtf());
     }
 
     private Map<String, DialogueState> getStates() {

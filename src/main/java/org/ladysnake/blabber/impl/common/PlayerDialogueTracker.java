@@ -22,7 +22,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.onyxstudios.cca.api.v3.component.ComponentKey;
 import dev.onyxstudios.cca.api.v3.component.ComponentRegistry;
 import dev.onyxstudios.cca.api.v3.component.tick.ServerTickingComponent;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+//import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -92,7 +93,7 @@ public final class PlayerDialogueTracker implements ServerTickingComponent {
         this.interlocutor = null;
 
         if (this.player instanceof ServerPlayer sp && this.player.containerMenu instanceof DialogueScreenHandler) {
-            sp.closeHandledScreen();
+            sp.closeContainer();
         }
     }
 
@@ -122,13 +123,13 @@ public final class PlayerDialogueTracker implements ServerTickingComponent {
 
     @Override
     public void readFromNbt(CompoundTag tag) {
-        if (tag.contains("current_dialogue_id", Tag.STRING_TYPE)) {
+        if (tag.contains("current_dialogue_id", Tag.TAG_STRING)) {
             ResourceLocation dialogueId = ResourceLocation.tryParse(tag.getString("current_dialogue_id"));
             if (dialogueId != null) {
                 Optional<DialogueTemplate> dialogueTemplate = DialogueRegistry.getOrEmpty(dialogueId);
                 if (dialogueTemplate.isPresent()) {
-                    UUID interlocutorUuid = tag.containsUuid("interlocutor") ? tag.getUuid("interlocutor") : null;
-                    String selectedState = tag.contains("current_dialogue_state", Tag.STRING_TYPE) ? tag.getString("current_dialogue_state") : null;
+                    UUID interlocutorUuid = tag.hasUUID("interlocutor") ? tag.getUUID("interlocutor") : null;
+                    String selectedState = tag.contains("current_dialogue_state", Tag.TAG_STRING) ? tag.getString("current_dialogue_state") : null;
                     this.deserializedState = new DeserializedState(dialogueId, dialogueTemplate.get(), selectedState, interlocutorUuid);
                 }
             }
@@ -141,7 +142,7 @@ public final class PlayerDialogueTracker implements ServerTickingComponent {
             tag.putString("current_dialogue_id", this.currentDialogue.getId().toString());
             tag.putString("current_dialogue_state", this.currentDialogue.getCurrentStateKey());
             if (this.interlocutor != null) {
-                tag.putUuid("interlocutor", this.interlocutor.getUuid());
+                tag.putUUID("interlocutor", this.interlocutor.getUUID());
             }
         }
     }
@@ -154,7 +155,7 @@ public final class PlayerDialogueTracker implements ServerTickingComponent {
             if (resumptionAttempts++ < 200) {   // only try for like, 10 seconds after joining the world
                 Entity interlocutor;
                 if (saved.interlocutorUuid() != null) {
-                    interlocutor = serverPlayer.getServerWorld().getEntity(saved.interlocutorUuid());
+                    interlocutor = serverPlayer.serverLevel().getEntity(saved.interlocutorUuid());
                     if (interlocutor == null) return;    // no one to talk to
                 } else {
                     interlocutor = null;
@@ -166,7 +167,7 @@ public final class PlayerDialogueTracker implements ServerTickingComponent {
         }
 
         if (this.currentDialogue != null) {
-            if (this.player.containerMenu == this.player.playerScreenHandler) {
+            if (this.player.containerMenu == this.player.inventoryMenu) {
                 if (this.currentDialogue.isUnskippable()) {
                     this.openDialogueScreen();
                 } else {
@@ -179,7 +180,7 @@ public final class PlayerDialogueTracker implements ServerTickingComponent {
                 ChoiceAvailabilityPacket update = this.updateConditions(serverPlayer, this.currentDialogue);
 
                 if (update != null) {
-                    ServerPlayNetworking.send(serverPlayer, update);
+                    ServerPlayNetworking.send(serverPlayer, update); // TODO
                 }
             } catch (CommandSyntaxException e) {
                 throw new IllegalStateException("Error while updating dialogue conditions", e);
@@ -198,18 +199,18 @@ public final class PlayerDialogueTracker implements ServerTickingComponent {
     private @Nullable ChoiceAvailabilityPacket updateConditions(ServerPlayer player, DialogueStateMachine currentDialogue) throws CommandSyntaxException {
         if (currentDialogue.hasConditions()) {
             return currentDialogue.updateConditions(new LootContext.Builder(
-                    new LootParams.Builder(player.getServerWorld())
-                            .add(LootContextParams.ORIGIN, player.getPos())
-                            .addOptional(LootContextParams.THIS_ENTITY, player)
-                            .build(LootContextParamSets.COMMAND)
-            ).build(null));
+                    new LootParams.Builder(player.serverLevel())
+                            .withParameter(LootContextParams.ORIGIN, player.position())
+                            .withOptionalParameter(LootContextParams.THIS_ENTITY, player)
+                            .create(LootContextParamSets.COMMAND)
+            ).create(null));
         }
         return null;
     }
 
     private void openDialogueScreen() {
         Preconditions.checkState(this.currentDialogue != null);
-        this.player.openHandledScreen(new DialogueScreenHandlerFactory(this.currentDialogue, Component.of("Blabber Dialogue Screen"), this.interlocutor));
+        this.player.openMenu((MenuProvider) new DialogueScreenHandlerFactory(this.currentDialogue, Component.literal("Blabber Dialogue Screen"), this.interlocutor));
     }
 
     private record DeserializedState(ResourceLocation dialogueId, DialogueTemplate template, String selectedState, @Nullable UUID interlocutorUuid) { }

@@ -17,6 +17,7 @@
  */
 package org.ladysnake.blabber.impl.client.compat;
 
+/*
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
@@ -38,3 +39,4 @@ public class BlabberJeiClientPlugin implements IModPlugin {
         registration.addGuiScreenHandler(BlabberRpgDialogueScreen.class, s -> null);
     }
 }
+ */

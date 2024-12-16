@@ -93,7 +93,7 @@ public class BlabberSettingsComponent implements AutoSyncedComponent {
     @Override
     public void readFromNbt(CompoundTag tag) {
         this.enabledSettings = EnumSet.noneOf(BlabberSetting.class);
-        for (Tag featureId : tag.getList("enabled_features", Tag.STRING_TYPE)) {
+        for (Tag featureId : tag.getList("enabled_features", Tag.TAG_STRING)) {
             BlabberSetting feature = BlabberSetting.getById(featureId.asString());
             if (feature != null) {
                 this.enabledSettings.add(feature);

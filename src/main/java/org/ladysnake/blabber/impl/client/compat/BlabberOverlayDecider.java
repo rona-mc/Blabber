@@ -17,6 +17,7 @@
  */
 package org.ladysnake.blabber.impl.client.compat;
 
+/*
 import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.InteractionResult;
@@ -33,3 +34,4 @@ public class BlabberOverlayDecider implements OverlayDecider {
         return InteractionResult.FAIL;
     }
 }
+ */

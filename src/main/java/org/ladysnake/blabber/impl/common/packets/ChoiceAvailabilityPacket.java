@@ -19,9 +19,9 @@ package org.ladysnake.blabber.impl.common.packets;
 
 import it.unimi.dsi.fastutil.ints.Int2BooleanMap;
 import it.unimi.dsi.fastutil.ints.Int2BooleanOpenHashMap;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
-import net.minecraft.network.PacketByteBuf;
+//import net.fabricmc.fabric.api.networking.v1.FabricPacket;
+//import net.fabricmc.fabric.api.networking.v1.PacketType;
+import net.minecraft.network.FriendlyByteBuf;
 import org.ladysnake.blabber.Blabber;
 
 import java.util.HashMap;
@@ -30,31 +30,31 @@ import java.util.Map;
 /**
  * Represents a list of dialogue choices which availability has changed
  */
-public record ChoiceAvailabilityPacket(Map<String, Int2BooleanMap> updatedChoices) implements FabricPacket {
-    public static final PacketType<ChoiceAvailabilityPacket> TYPE = PacketType.create(Blabber.id("choice_availability"), ChoiceAvailabilityPacket::new);
+public record ChoiceAvailabilityPacket(Map<String, Int2BooleanMap> updatedChoices) implements FabricPacket { // TODO
+    public static final PacketType<ChoiceAvailabilityPacket> TYPE = PacketType.create(Blabber.id("choice_availability"), ChoiceAvailabilityPacket::new); // TODO
 
     public ChoiceAvailabilityPacket() {
         this(new HashMap<>());
     }
 
-    public ChoiceAvailabilityPacket(PacketByteBuf buf) {
+    public ChoiceAvailabilityPacket(FriendlyByteBuf buf) {
         this(buf.readMap(
-                PacketByteBuf::readString,
-                b -> b.readMap(Int2BooleanOpenHashMap::new, PacketByteBuf::readVarInt, PacketByteBuf::readBoolean)
+                FriendlyByteBuf::readUtf,
+                b -> b.readMap(Int2BooleanOpenHashMap::new, FriendlyByteBuf::readVarInt, FriendlyByteBuf::readBoolean)
         ));
     }
 
     @Override
-    public void write(PacketByteBuf buf) {
+    public void write(FriendlyByteBuf buf) {
         buf.writeMap(
                 this.updatedChoices(),
-                PacketByteBuf::writeString,
-                (b, updatedChoices) -> b.writeMap(updatedChoices, PacketByteBuf::writeVarInt, PacketByteBuf::writeBoolean)
+                FriendlyByteBuf::writeUtf,
+                (b, updatedChoices) -> b.writeMap(updatedChoices, FriendlyByteBuf::writeVarInt, FriendlyByteBuf::writeBoolean)
         );
     }
 
     @Override
-    public PacketType<?> getType() {
+    public PacketType<?> getType() { // TODO
         return TYPE;
     }
 

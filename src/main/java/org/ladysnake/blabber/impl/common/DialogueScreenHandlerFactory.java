@@ -17,7 +17,7 @@
  */
 package org.ladysnake.blabber.impl.common;
 
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
+//import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
@@ -30,6 +30,7 @@ import org.ladysnake.blabber.impl.common.machine.DialogueStateMachine;
 
 import java.util.Optional;
 
+// TODO
 public class DialogueScreenHandlerFactory implements ExtendedScreenHandlerFactory {
     private final DialogueStateMachine dialogue;
     private final Component displayName;
