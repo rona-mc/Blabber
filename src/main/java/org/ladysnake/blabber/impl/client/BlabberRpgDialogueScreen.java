@@ -18,12 +18,12 @@
 package org.ladysnake.blabber.impl.client;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.ColorHelper;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.FastColor;
 import org.joml.Matrix4f;
 import org.ladysnake.blabber.api.client.BlabberDialogueScreen;
 import org.ladysnake.blabber.api.layout.DefaultLayoutParams;
@@ -37,7 +37,7 @@ public class BlabberRpgDialogueScreen extends BlabberDialogueScreen<DefaultLayou
     public static final int TEXT_TOP_MARGIN = 12;
     protected int choiceListMaxY;
 
-    public BlabberRpgDialogueScreen(DialogueScreenHandler handler, PlayerInventory inventory, Text title) {
+    public BlabberRpgDialogueScreen(DialogueScreenHandler handler, Inventory inventory, Component title) {
         super(handler, inventory, title);
         this.selectionIconTexture = DIALOGUE_ARROWS.get(1);
         this.lockIconTexture = DIALOGUE_LOCKS.get(2);
@@ -87,7 +87,7 @@ public class BlabberRpgDialogueScreen extends BlabberDialogueScreen<DefaultLayou
     }
 
     @Override
-    public void renderBackground(DrawContext context) {
+    public void renderBackground(GuiGraphics context) {
         // Side background
         int y = this.choiceListMinY;
         ImmutableList<AvailableChoice> availableChoices = handler.getAvailableChoices();
@@ -103,18 +103,18 @@ public class BlabberRpgDialogueScreen extends BlabberDialogueScreen<DefaultLayou
         context.fillGradient(0, this.mainTextMinY - TEXT_TOP_MARGIN, this.width, this.height, 0xc0101010, 0xd0101010);
     }
 
-    public static void fillHorizontalGradient(DrawContext context, int startX, int startY, int endX, int endY, int colorStart, int colorEnd) {
+    public static void fillHorizontalGradient(GuiGraphics context, int startX, int startY, int endX, int endY, int colorStart, int colorEnd) {
         final int z = 0;
         final int verticalPadding = 2;
-        VertexConsumer vertexConsumer = context.getVertexConsumers().getBuffer(RenderLayer.getGui());
-        float a0 = (float) ColorHelper.Argb.getAlpha(colorStart) / 255.0F;
-        float r0 = (float) ColorHelper.Argb.getRed(colorStart) / 255.0F;
-        float g0 = (float) ColorHelper.Argb.getGreen(colorStart) / 255.0F;
-        float b0 = (float) ColorHelper.Argb.getBlue(colorStart) / 255.0F;
-        float a1 = (float) ColorHelper.Argb.getAlpha(colorEnd) / 255.0F;
-        float r1 = (float) ColorHelper.Argb.getRed(colorEnd) / 255.0F;
-        float g1 = (float) ColorHelper.Argb.getGreen(colorEnd) / 255.0F;
-        float b1 = (float) ColorHelper.Argb.getBlue(colorEnd) / 255.0F;
+        VertexConsumer vertexConsumer = context.getVertexConsumers().getBuffer(RenderType.getGui());
+        float a0 = (float) FastColor.Argb.getAlpha(colorStart) / 255.0F;
+        float r0 = (float) FastColor.Argb.getRed(colorStart) / 255.0F;
+        float g0 = (float) FastColor.Argb.getGreen(colorStart) / 255.0F;
+        float b0 = (float) FastColor.Argb.getBlue(colorStart) / 255.0F;
+        float a1 = (float) FastColor.Argb.getAlpha(colorEnd) / 255.0F;
+        float r1 = (float) FastColor.Argb.getRed(colorEnd) / 255.0F;
+        float g1 = (float) FastColor.Argb.getGreen(colorEnd) / 255.0F;
+        float b1 = (float) FastColor.Argb.getBlue(colorEnd) / 255.0F;
         Matrix4f matrix4f = context.getMatrices().peek().getPositionMatrix();
         vertexConsumer.vertex(matrix4f, (float)startX, (float)startY - verticalPadding, (float)z).color(r1, g1, b1, a1).next();
         vertexConsumer.vertex(matrix4f, (float)startX, (float)startY, (float)z).color(r0, g0, b0, a0).next();

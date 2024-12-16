@@ -20,11 +20,11 @@ package org.ladysnake.blabber.impl.client.illustrations;
 import com.mojang.authlib.GameProfile;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.network.OtherClientPlayerEntity;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.world.World;
+import net.minecraft.client.player.RemotePlayer;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import org.ladysnake.blabber.impl.common.illustrations.entity.DialogueIllustrationFakePlayer;
 import org.ladysnake.blabber.impl.mixin.PlayerEntityAccessor;
@@ -38,11 +38,11 @@ public class FakePlayerIllustrationRenderer extends EntityIllustrationRenderer<D
     @SuppressWarnings("UnreachableCode")
     @Environment(EnvType.CLIENT)
     @Override
-    protected @Nullable LivingEntity getRenderedEntity(World world) {
+    protected @Nullable LivingEntity getRenderedEntity(Level world) {
         GameProfile profile = this.illustration.profile();
-        OtherClientPlayerEntity fakePlayer = new OtherClientPlayerEntity((ClientWorld) world, profile);
+        RemotePlayer fakePlayer = new RemotePlayer((ClientLevel) world, profile);
         this.illustration.data().ifPresent(fakePlayer::readNbt);
-        ((AbstractClientPlayerEntityAccessor) fakePlayer).setPlayerListEntry(new PlayerListEntry(profile, false));
+        ((AbstractClientPlayerEntityAccessor) fakePlayer).setPlayerListEntry(new PlayerInfo(profile, false));
         fakePlayer.prevBodyYaw = fakePlayer.bodyYaw = 0.0f;
         fakePlayer.prevHeadYaw = fakePlayer.headYaw = 0.0f;
         DialogueIllustrationFakePlayer.PlayerModelOptions playerModelOptions = this.illustration.modelOptionsOrDefault();

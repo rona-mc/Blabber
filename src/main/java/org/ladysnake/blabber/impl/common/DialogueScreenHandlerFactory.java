@@ -18,13 +18,13 @@
 package org.ladysnake.blabber.impl.common;
 
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import org.ladysnake.blabber.impl.common.machine.DialogueStateMachine;
 
@@ -32,30 +32,30 @@ import java.util.Optional;
 
 public class DialogueScreenHandlerFactory implements ExtendedScreenHandlerFactory {
     private final DialogueStateMachine dialogue;
-    private final Text displayName;
+    private final Component displayName;
     private final @Nullable Entity interlocutor;
 
-    public DialogueScreenHandlerFactory(DialogueStateMachine dialogue, Text displayName, @Nullable Entity interlocutor) {
+    public DialogueScreenHandlerFactory(DialogueStateMachine dialogue, Component displayName, @Nullable Entity interlocutor) {
         this.dialogue = dialogue;
         this.displayName = displayName;
         this.interlocutor = interlocutor;
     }
 
     @Override
-    public void writeScreenOpeningData(ServerPlayerEntity player, PacketByteBuf buf) {
+    public void writeScreenOpeningData(ServerPlayer player, FriendlyByteBuf buf) {
         DialogueStateMachine.writeToPacket(buf, this.dialogue);
         buf.writeOptional(Optional.ofNullable(interlocutor), (b, e) -> b.writeVarInt(e.getId()));
         this.dialogue.createFullAvailabilityUpdatePacket().write(buf);
     }
 
     @Override
-    public Text getDisplayName() {
+    public Component getDisplayName() {
         return this.displayName;
     }
 
     @Nullable
     @Override
-    public ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
+    public AbstractContainerMenu createMenu(int syncId, Inventory inv, Player player) {
         return new DialogueScreenHandler(BlabberRegistrar.DIALOGUE_SCREEN_HANDLER, syncId, this.dialogue, this.interlocutor);
     }
 }

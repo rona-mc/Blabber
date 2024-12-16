@@ -19,7 +19,7 @@ package org.ladysnake.blabber.api.layout;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import org.ladysnake.blabber.impl.common.serialization.FailingOptionalFieldCodec;
 
 public record Margins(int top, int right, int bottom, int left) {
@@ -31,14 +31,14 @@ public record Margins(int top, int right, int bottom, int left) {
     ).apply(instance, Margins::new));
     public static final Margins NONE = new Margins(0, 0, 0, 0);
 
-    public static void writeToPacket(PacketByteBuf buf, Margins margins) {
+    public static void writeToPacket(FriendlyByteBuf buf, Margins margins) {
         buf.writeVarInt(margins.top());
         buf.writeVarInt(margins.right());
         buf.writeVarInt(margins.bottom());
         buf.writeVarInt(margins.left());
     }
 
-    public Margins(PacketByteBuf buf) {
+    public Margins(FriendlyByteBuf buf) {
         this(buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt());
     }
 }

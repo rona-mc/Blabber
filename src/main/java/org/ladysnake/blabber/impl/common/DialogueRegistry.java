@@ -17,7 +17,7 @@
  */
 package org.ladysnake.blabber.impl.common;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.ladysnake.blabber.impl.common.model.DialogueTemplate;
 
@@ -36,31 +36,31 @@ import java.util.Set;
  */
 
 public final class DialogueRegistry {
-    private static Set<Identifier> clientDialogueIds = Set.of();
-    private static Map<Identifier, DialogueTemplate> entries = Map.of();
+    private static Set<ResourceLocation> clientDialogueIds = Set.of();
+    private static Map<ResourceLocation, DialogueTemplate> entries = Map.of();
 
-    public static Set<Identifier> getClientIds() {
+    public static Set<ResourceLocation> getClientIds() {
         return clientDialogueIds;
     }
 
-    public static Set<Identifier> getIds() {
+    public static Set<ResourceLocation> getIds() {
         return entries.keySet();
     }
 
-    public static Optional<DialogueTemplate> getOrEmpty(Identifier id) {
+    public static Optional<DialogueTemplate> getOrEmpty(ResourceLocation id) {
         return Optional.ofNullable(entries.get(id));
     }
 
-    public static boolean containsId(Identifier id) {
+    public static boolean containsId(ResourceLocation id) {
         return getIds().contains(id);
     }
 
-    static void setEntries(Map<Identifier, DialogueTemplate> newEntries) {
+    static void setEntries(Map<ResourceLocation, DialogueTemplate> newEntries) {
         entries = newEntries;
     }
 
     @ApiStatus.Internal // highly internal
-    public static void setClientIds(Set<Identifier> dialogueIds) {
+    public static void setClientIds(Set<ResourceLocation> dialogueIds) {
         clientDialogueIds = dialogueIds;
     }
 }

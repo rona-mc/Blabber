@@ -23,6 +23,6 @@
 @ApiStatus.Internal
 package org.ladysnake.blabber.impl.mixin.client.compat.emi;
 
-import net.minecraft.util.annotation.FieldsAreNonnullByDefault;
-import net.minecraft.util.annotation.MethodsReturnNonnullByDefault;
+import net.minecraft.FieldsAreNonnullByDefault;
+import net.minecraft.MethodsReturnNonnullByDefault;
 import org.jetbrains.annotations.ApiStatus;

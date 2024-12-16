@@ -28,18 +28,18 @@ import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.serialize.ConstantArgumentSerializer;
-import net.minecraft.command.suggestion.SuggestionProviders;
-import net.minecraft.entity.Entity;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.SimpleRegistry;
-import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.util.Identifier;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.synchronization.SingletonArgumentInfo;
+import net.minecraft.commands.synchronization.SuggestionProviders;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.resources.ResourceLocation;
 import org.ladysnake.blabber.Blabber;
 import org.ladysnake.blabber.api.DialogueActionV2;
 import org.ladysnake.blabber.api.illustration.DialogueIllustrationType;
@@ -56,45 +56,45 @@ import java.util.Optional;
 import java.util.Set;
 
 public final class BlabberRegistrar implements EntityComponentInitializer {
-    public static final ScreenHandlerType<DialogueScreenHandler> DIALOGUE_SCREEN_HANDLER = Registry.register(Registries.SCREEN_HANDLER, Blabber.id("dialogue"), new ExtendedScreenHandlerType<>((syncId, inventory, buf) -> {
+    public static final MenuType<DialogueScreenHandler> DIALOGUE_SCREEN_HANDLER = Registry.register(BuiltInRegistries.SCREEN_HANDLER, Blabber.id("dialogue"), new ExtendedScreenHandlerType<>((syncId, inventory, buf) -> {
         DialogueStateMachine dialogue = new DialogueStateMachine(buf);
-        Optional<Entity> interlocutor = buf.readOptional(PacketByteBuf::readVarInt).map(inventory.player.getWorld()::getEntityById);
+        Optional<Entity> interlocutor = buf.readOptional(FriendlyByteBuf::readVarInt).map(inventory.player.getWorld()::getEntityById);
         ChoiceAvailabilityPacket choicesAvailability = new ChoiceAvailabilityPacket(buf);
         dialogue.applyAvailabilityUpdate(choicesAvailability);
         return new DialogueScreenHandler(syncId, dialogue, interlocutor.orElse(null));
     }));
-    public static final Identifier DIALOGUE_ACTION = Blabber.id("dialogue_action");
-    public static final RegistryKey<Registry<Codec<? extends DialogueActionV2>>> ACTION_REGISTRY_KEY = RegistryKey.ofRegistry(Blabber.id("dialogue_actions"));
+    public static final ResourceLocation DIALOGUE_ACTION = Blabber.id("dialogue_action");
+    public static final ResourceKey<Registry<Codec<? extends DialogueActionV2>>> ACTION_REGISTRY_KEY = ResourceKey.ofRegistry(Blabber.id("dialogue_actions"));
     public static final Registry<Codec<? extends DialogueActionV2>> ACTION_REGISTRY = FabricRegistryBuilder.from(
-            new SimpleRegistry<>(ACTION_REGISTRY_KEY, Lifecycle.stable(), false)
+            new MappedRegistry<>(ACTION_REGISTRY_KEY, Lifecycle.stable(), false)
     ).buildAndRegister();
 
-    public static final RegistryKey<Registry<DialogueIllustrationType<?>>> ILLUSTRATION_REGISTRY_KEY = RegistryKey.ofRegistry(Blabber.id("dialogue_illustrations"));
+    public static final ResourceKey<Registry<DialogueIllustrationType<?>>> ILLUSTRATION_REGISTRY_KEY = ResourceKey.ofRegistry(Blabber.id("dialogue_illustrations"));
     public static final Registry<DialogueIllustrationType<?>> ILLUSTRATION_REGISTRY = FabricRegistryBuilder.from(
-            new SimpleRegistry<>(ILLUSTRATION_REGISTRY_KEY, Lifecycle.stable(), false)
+            new MappedRegistry<>(ILLUSTRATION_REGISTRY_KEY, Lifecycle.stable(), false)
     ).buildAndRegister();
 
-    public static final RegistryKey<Registry<DialogueLayoutType<?>>> LAYOUT_REGISTRY_KEY = RegistryKey.ofRegistry(Blabber.id("dialogue_layouts"));
+    public static final ResourceKey<Registry<DialogueLayoutType<?>>> LAYOUT_REGISTRY_KEY = ResourceKey.ofRegistry(Blabber.id("dialogue_layouts"));
     public static final Registry<DialogueLayoutType<?>> LAYOUT_REGISTRY = FabricRegistryBuilder.from(
-            new SimpleRegistry<>(LAYOUT_REGISTRY_KEY, Lifecycle.stable(), false)
+            new MappedRegistry<>(LAYOUT_REGISTRY_KEY, Lifecycle.stable(), false)
     ).buildAndRegister();
     public static final DialogueLayoutType<DefaultLayoutParams> CLASSIC_LAYOUT = new DialogueLayoutType<>(DefaultLayoutParams.CODEC, DefaultLayoutParams.DEFAULT, DefaultLayoutParams::new, DefaultLayoutParams::writeToPacket);
     public static final DialogueLayoutType<DefaultLayoutParams> RPG_LAYOUT = new DialogueLayoutType<>(DefaultLayoutParams.CODEC, DefaultLayoutParams.DEFAULT, DefaultLayoutParams::new, DefaultLayoutParams::writeToPacket);
 
-    public static final SuggestionProvider<ServerCommandSource> ALL_DIALOGUES = SuggestionProviders.register(
+    public static final SuggestionProvider<CommandSourceStack> ALL_DIALOGUES = SuggestionProviders.register(
             Blabber.id("available_dialogues"),
-            (context, builder) -> CommandSource.suggestIdentifiers(context.getSource() instanceof ServerCommandSource ? DialogueRegistry.getIds() : DialogueRegistry.getClientIds(), builder)
+            (context, builder) -> SharedSuggestionProvider.suggestIdentifiers(context.getSource() instanceof CommandSourceStack ? DialogueRegistry.getIds() : DialogueRegistry.getClientIds(), builder)
     );
 
     public static void init() {
-        Registry.register(Registries.LOOT_CONDITION_TYPE, Blabber.id("interlocutor_properties"), InterlocutorPropertiesLootCondition.TYPE);
-        ArgumentTypeRegistry.registerArgumentType(Blabber.id("setting"), SettingArgumentType.class, ConstantArgumentSerializer.of(SettingArgumentType::setting));
+        Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, Blabber.id("interlocutor_properties"), InterlocutorPropertiesLootCondition.TYPE);
+        ArgumentTypeRegistry.registerArgumentType(Blabber.id("setting"), SettingArgumentType.class, SingletonArgumentInfo.of(SettingArgumentType::setting));
 
         DialogueLoader.init();
         ServerPlayNetworking.registerGlobalReceiver(DIALOGUE_ACTION, (server, player, handler, buf, responseSender) -> {
             int choice = buf.readByte();
             server.execute(() -> {
-                if (player.currentScreenHandler instanceof DialogueScreenHandler dialogueHandler) {
+                if (player.containerMenu instanceof DialogueScreenHandler dialogueHandler) {
                     if (!dialogueHandler.makeChoice(player, choice)) {
                         responseSender.sendPacket(new SelectedDialogueStatePacket(dialogueHandler.getCurrentStateKey()));
                     }
@@ -103,7 +103,7 @@ public final class BlabberRegistrar implements EntityComponentInitializer {
         });
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             if (ServerPlayNetworking.canSend(handler, DialogueListPacket.TYPE)) {
-                Set<Identifier> dialogueIds = DialogueRegistry.getIds();
+                Set<ResourceLocation> dialogueIds = DialogueRegistry.getIds();
                 sender.sendPacket(new DialogueListPacket(dialogueIds));
             } else {
                 Blabber.LOGGER.warn("{} does not have Blabber installed, this will cause issues if they trigger a dialogue", handler.getPlayer().getEntityName());

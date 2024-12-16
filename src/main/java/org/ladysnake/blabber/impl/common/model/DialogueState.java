@@ -20,12 +20,12 @@ package org.ladysnake.blabber.impl.common.model;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.entity.Entity;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
-import net.minecraft.text.Texts;
-import net.minecraft.util.dynamic.Codecs;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.util.ExtraCodecs;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.ladysnake.blabber.impl.common.InstancedDialogueAction;
@@ -38,7 +38,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 public record DialogueState(
-        Text text,
+        Component text,
         List<String> illustrations,
         List<DialogueChoice> choices,
         Optional<InstancedDialogueAction<?>> action,
@@ -46,37 +46,37 @@ public record DialogueState(
 ) {
     public static final Codec<DialogueState> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             // Kinda optional, but we still want errors if you got it wrong >:(
-            FailingOptionalFieldCodec.of(Codecs.TEXT, "text", Text.empty()).forGetter(DialogueState::text),
+            FailingOptionalFieldCodec.of(ExtraCodecs.TEXT, "text", Component.empty()).forGetter(DialogueState::text),
             FailingOptionalFieldCodec.of(Codec.list(Codec.STRING), "illustrations", Collections.emptyList()).forGetter(DialogueState::illustrations),
             FailingOptionalFieldCodec.of(Codec.list(DialogueChoice.CODEC), "choices", List.of()).forGetter(DialogueState::choices),
             FailingOptionalFieldCodec.of(InstancedDialogueAction.CODEC, "action").forGetter(DialogueState::action),
             FailingOptionalFieldCodec.of(Codec.STRING.xmap(s -> Enum.valueOf(ChoiceResult.class, s.toUpperCase(Locale.ROOT)), Enum::name), "type", ChoiceResult.DEFAULT).forGetter(DialogueState::type)
     ).apply(instance, DialogueState::new));
 
-    public static void writeToPacket(PacketByteBuf buf, DialogueState state) {
+    public static void writeToPacket(FriendlyByteBuf buf, DialogueState state) {
         buf.writeText(state.text());
-        buf.writeCollection(state.illustrations(), PacketByteBuf::writeString);
+        buf.writeCollection(state.illustrations(), FriendlyByteBuf::writeString);
         buf.writeCollection(state.choices(), DialogueChoice::writeToPacket);
         buf.writeEnumConstant(state.type());
         // not writing the action, the client most likely does not need to know about it
     }
 
-    public DialogueState(PacketByteBuf buf) {
-        this(buf.readText(), buf.readCollection(ArrayList::new, PacketByteBuf::readString), buf.readList(DialogueChoice::new), Optional.empty(), buf.readEnumConstant(ChoiceResult.class));
+    public DialogueState(FriendlyByteBuf buf) {
+        this(buf.readText(), buf.readCollection(ArrayList::new, FriendlyByteBuf::readString), buf.readList(DialogueChoice::new), Optional.empty(), buf.readEnumConstant(ChoiceResult.class));
     }
 
     public String getNextState(int choice) {
         return this.choices.get(choice).next();
     }
 
-    public DialogueState parseText(@Nullable ServerCommandSource source, @Nullable Entity sender) throws CommandSyntaxException {
+    public DialogueState parseText(@Nullable CommandSourceStack source, @Nullable Entity sender) throws CommandSyntaxException {
         List<DialogueChoice> parsedChoices = new ArrayList<>(choices().size());
         for (DialogueChoice choice : choices()) {
             parsedChoices.add(choice.parseText(source, sender));
         }
 
         return new DialogueState(
-                Texts.parse(source, text(), sender, 0),
+                ComponentUtils.parse(source, text(), sender, 0),
                 illustrations(),
                 parsedChoices,
                 action(),

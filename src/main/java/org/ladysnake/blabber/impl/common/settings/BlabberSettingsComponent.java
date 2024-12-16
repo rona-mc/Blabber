@@ -20,13 +20,13 @@ package org.ladysnake.blabber.impl.common.settings;
 import dev.onyxstudios.cca.api.v3.component.ComponentKey;
 import dev.onyxstudios.cca.api.v3.component.ComponentRegistry;
 import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 import org.ladysnake.blabber.Blabber;
 import org.ladysnake.blabber.impl.common.commands.SettingsSubCommand;
 
@@ -35,14 +35,14 @@ import java.util.EnumSet;
 public class BlabberSettingsComponent implements AutoSyncedComponent {
     public static final ComponentKey<BlabberSettingsComponent> KEY = ComponentRegistry.getOrCreate(Blabber.id("settings"), BlabberSettingsComponent.class);
 
-    public static BlabberSettingsComponent get(PlayerEntity player) {
+    public static BlabberSettingsComponent get(Player player) {
         return player.getComponent(KEY);
     }
 
     private EnumSet<BlabberSetting> enabledSettings = EnumSet.noneOf(BlabberSetting.class);
-    private final PlayerEntity player;
+    private final Player player;
 
-    public BlabberSettingsComponent(PlayerEntity player) {
+    public BlabberSettingsComponent(Player player) {
         this.player = player;
     }
 
@@ -67,12 +67,12 @@ public class BlabberSettingsComponent implements AutoSyncedComponent {
     }
 
     @Override
-    public boolean shouldSyncWith(ServerPlayerEntity player) {
+    public boolean shouldSyncWith(ServerPlayer player) {
         return player == this.player;
     }
 
     @Override
-    public void writeSyncPacket(PacketByteBuf buf, ServerPlayerEntity recipient) {
+    public void writeSyncPacket(FriendlyByteBuf buf, ServerPlayer recipient) {
         boolean enabled = this.isDebugEnabled();
         buf.writeBoolean(enabled);
         if (enabled) {
@@ -81,7 +81,7 @@ public class BlabberSettingsComponent implements AutoSyncedComponent {
     }
 
     @Override
-    public void applySyncPacket(PacketByteBuf buf) {
+    public void applySyncPacket(FriendlyByteBuf buf) {
         boolean debugEnabled = buf.readBoolean();
         if (debugEnabled) {
             this.enabledSettings = buf.readEnumSet(BlabberSetting.class);
@@ -91,9 +91,9 @@ public class BlabberSettingsComponent implements AutoSyncedComponent {
     }
 
     @Override
-    public void readFromNbt(NbtCompound tag) {
+    public void readFromNbt(CompoundTag tag) {
         this.enabledSettings = EnumSet.noneOf(BlabberSetting.class);
-        for (NbtElement featureId : tag.getList("enabled_features", NbtElement.STRING_TYPE)) {
+        for (Tag featureId : tag.getList("enabled_features", Tag.STRING_TYPE)) {
             BlabberSetting feature = BlabberSetting.getById(featureId.asString());
             if (feature != null) {
                 this.enabledSettings.add(feature);
@@ -102,10 +102,10 @@ public class BlabberSettingsComponent implements AutoSyncedComponent {
     }
 
     @Override
-    public void writeToNbt(NbtCompound tag) {
-        NbtList list = new NbtList();
+    public void writeToNbt(CompoundTag tag) {
+        ListTag list = new ListTag();
         for (BlabberSetting feature : this.enabledSettings) {
-            list.add(NbtString.of(feature.id()));
+            list.add(StringTag.of(feature.id()));
         }
         tag.put("enabled_features", list);
     }

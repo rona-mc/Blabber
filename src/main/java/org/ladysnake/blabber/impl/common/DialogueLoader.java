@@ -27,13 +27,13 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
 import net.fabricmc.fabric.api.resource.SimpleResourceReloadListener;
-import net.minecraft.resource.LifecycledResourceManager;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.ResourceType;
+import net.minecraft.server.packs.resources.CloseableResourceManager;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.profiler.Profiler;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.profiling.ProfilerFiller;
 import org.ladysnake.blabber.Blabber;
 import org.ladysnake.blabber.impl.common.model.DialogueTemplate;
 import org.ladysnake.blabber.impl.common.packets.DialogueListPacket;
@@ -52,25 +52,25 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 
-public final class DialogueLoader implements SimpleResourceReloadListener<Map<Identifier, DialogueTemplate>>, ServerLifecycleEvents.EndDataPackReload {
+public final class DialogueLoader implements SimpleResourceReloadListener<Map<ResourceLocation, DialogueTemplate>>, ServerLifecycleEvents.EndDataPackReload {
     public static final String BLABBER_DIALOGUES_PATH = "blabber/dialogues";
-    public static final Identifier ID = Blabber.id("dialogue_loader");
+    public static final ResourceLocation ID = Blabber.id("dialogue_loader");
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     public static void init() {
         DialogueLoader instance = new DialogueLoader();
-        ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(instance);
+        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(instance);
         ServerLifecycleEvents.END_DATA_PACK_RELOAD.register(instance);
     }
 
     @Override
-    public CompletableFuture<Map<Identifier, DialogueTemplate>> load(ResourceManager manager, Profiler profiler, Executor executor) {
+    public CompletableFuture<Map<ResourceLocation, DialogueTemplate>> load(ResourceManager manager, ProfilerFiller profiler, Executor executor) {
         return CompletableFuture.supplyAsync(() -> {
-            Map<Identifier, DialogueTemplate> data = new HashMap<>();
+            Map<ResourceLocation, DialogueTemplate> data = new HashMap<>();
             manager.findResources(BLABBER_DIALOGUES_PATH, (res) -> res.getPath().endsWith(".json")).forEach((location, resource) -> {
                 try (Reader in = new InputStreamReader(resource.getInputStream())) {
                     JsonObject jsonObject = GSON.fromJson(in, JsonObject.class);
-                    Identifier id = new Identifier(location.getNamespace(), location.getPath().substring(BLABBER_DIALOGUES_PATH.length() + 1, location.getPath().length() - 5));
+                    ResourceLocation id = new ResourceLocation(location.getNamespace(), location.getPath().substring(BLABBER_DIALOGUES_PATH.length() + 1, location.getPath().length() - 5));
                     DialogueTemplate dialogue = DialogueTemplate.CODEC.parse(JsonOps.INSTANCE, jsonObject).getOrThrow(false, message -> Blabber.LOGGER.error("(Blabber) Could not parse dialogue file from {}: {}", location, message));
                     ValidationResult result = DialogueValidator.validateStructure(dialogue);
                     // TODO GIVE ME PATTERN MATCHING IN SWITCHES
@@ -92,26 +92,26 @@ public final class DialogueLoader implements SimpleResourceReloadListener<Map<Id
     }
 
     @Override
-    public CompletableFuture<Void> apply(Map<Identifier, DialogueTemplate> data, ResourceManager manager, Profiler profiler, Executor executor) {
+    public CompletableFuture<Void> apply(Map<ResourceLocation, DialogueTemplate> data, ResourceManager manager, ProfilerFiller profiler, Executor executor) {
         return CompletableFuture.runAsync(() -> DialogueRegistry.setEntries(data), executor);
     }
 
     @Override
-    public Identifier getFabricId() {
+    public ResourceLocation getFabricId() {
         return ID;
     }
 
     @Override
-    public Collection<Identifier> getFabricDependencies() {
+    public Collection<ResourceLocation> getFabricDependencies() {
         return Set.of(ResourceReloadListenerKeys.LOOT_TABLES);  // for dialogue choice predicates
     }
 
     @Override
-    public void endDataPackReload(MinecraftServer server, LifecycledResourceManager resourceManager, boolean success) {
+    public void endDataPackReload(MinecraftServer server, CloseableResourceManager resourceManager, boolean success) {
         if (success) {
-            Set<Identifier> dialogueIds = DialogueRegistry.getIds();
+            Set<ResourceLocation> dialogueIds = DialogueRegistry.getIds();
             DialogueListPacket idSyncPacket = new DialogueListPacket(dialogueIds);
-            for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+            for (ServerPlayer player : server.getPlayerManager().getPlayerList()) {
                 ServerPlayNetworking.send(player, idSyncPacket);
                 PlayerDialogueTracker.get(player).updateDialogue();
             }

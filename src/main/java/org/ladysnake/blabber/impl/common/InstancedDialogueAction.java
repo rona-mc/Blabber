@@ -18,7 +18,7 @@
 package org.ladysnake.blabber.impl.common;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.ladysnake.blabber.api.DialogueActionV2;
 
 public record InstancedDialogueAction<A extends DialogueActionV2>(A action,
@@ -32,7 +32,7 @@ public record InstancedDialogueAction<A extends DialogueActionV2>(A action,
 
     @Override
     public String toString() {
-        Identifier id = BlabberRegistrar.ACTION_REGISTRY.getId(this.codec);
+        ResourceLocation id = BlabberRegistrar.ACTION_REGISTRY.getId(this.codec);
         if (id == null) return "(unregistered action)";
         return id.toString();
     }

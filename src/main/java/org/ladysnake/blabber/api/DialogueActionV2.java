@@ -18,14 +18,14 @@
 package org.ladysnake.blabber.api;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.entity.Entity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * @see org.ladysnake.blabber.Blabber#registerAction(Identifier, DialogueActionV2)
- * @see org.ladysnake.blabber.Blabber#registerAction(Identifier, Codec)
+ * @see org.ladysnake.blabber.Blabber#registerAction(ResourceLocation, DialogueActionV2)
+ * @see org.ladysnake.blabber.Blabber#registerAction(ResourceLocation, Codec)
  */
 @FunctionalInterface
 public interface DialogueActionV2 {
@@ -34,7 +34,7 @@ public interface DialogueActionV2 {
      *
      * @param player the player executing the action
      * @param interlocutor the entity with which the player is conversing, if any
-     * @see org.ladysnake.blabber.Blabber#startDialogue(ServerPlayerEntity, Identifier, Entity)
+     * @see org.ladysnake.blabber.Blabber#startDialogue(ServerPlayer, ResourceLocation, Entity)
      */
-    void handle(ServerPlayerEntity player, @Nullable Entity interlocutor);
+    void handle(ServerPlayer player, @Nullable Entity interlocutor);
 }

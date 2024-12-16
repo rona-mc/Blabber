@@ -20,9 +20,9 @@ package org.ladysnake.blabber.impl.common.illustrations.entity;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.Identifier;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import org.ladysnake.blabber.api.illustration.DialogueIllustrationType;
 import org.ladysnake.blabber.impl.common.model.IllustrationAnchor;
 import org.ladysnake.blabber.impl.common.serialization.EitherMapCodec;
@@ -31,9 +31,9 @@ import org.ladysnake.blabber.impl.common.serialization.OptionalSerialization;
 
 import java.util.Optional;
 
-public record DialogueIllustrationNbtEntity(Identifier id, IllustrationAnchor anchor, int x, int y, int width, int height, int entitySize, float yOffset, StareTarget stareAt, Optional<NbtCompound> data) implements DialogueIllustrationEntity {
+public record DialogueIllustrationNbtEntity(ResourceLocation id, IllustrationAnchor anchor, int x, int y, int width, int height, int entitySize, float yOffset, StareTarget stareAt, Optional<CompoundTag> data) implements DialogueIllustrationEntity {
     private static final MapCodec<DialogueIllustrationNbtEntity> CODEC_V0 = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            Identifier.CODEC.fieldOf("id").forGetter(DialogueIllustrationNbtEntity::id),
+            ResourceLocation.CODEC.fieldOf("id").forGetter(DialogueIllustrationNbtEntity::id),
             FailingOptionalFieldCodec.of(IllustrationAnchor.CODEC, "anchor", IllustrationAnchor.TOP_LEFT).forGetter(DialogueIllustrationNbtEntity::anchor),
             Codec.INT.fieldOf("x1").forGetter(DialogueIllustrationNbtEntity::x),
             Codec.INT.fieldOf("y1").forGetter(DialogueIllustrationNbtEntity::y),
@@ -43,7 +43,7 @@ public record DialogueIllustrationNbtEntity(Identifier id, IllustrationAnchor an
             FailingOptionalFieldCodec.of(Codec.FLOAT, "y_offset", 0.0f).forGetter(DialogueIllustrationNbtEntity::yOffset),
             OptionalSerialization.optionalIntField("stare_at_x").forGetter(s -> s.stareAt().x()),
             OptionalSerialization.optionalIntField("stare_at_y").forGetter(s -> s.stareAt().y()),
-            FailingOptionalFieldCodec.of(NbtCompound.CODEC, "data").forGetter(DialogueIllustrationNbtEntity::data)
+            FailingOptionalFieldCodec.of(CompoundTag.CODEC, "data").forGetter(DialogueIllustrationNbtEntity::data)
     ).apply(instance, (id, anchor, x1, y1, x2, y2, size, yOff, stareAtX, stareAtY, data) -> {
         int minX = Math.min(x1, x2);
         int minY = Math.min(y1, y2);
@@ -52,7 +52,7 @@ public record DialogueIllustrationNbtEntity(Identifier id, IllustrationAnchor an
         return new DialogueIllustrationNbtEntity(id, anchor, minX, minY, maxX - minX, maxY - minY, size, yOff, new StareTarget(Optional.empty(), stareAtX, stareAtY), data);
     }));
     private static final MapCodec<DialogueIllustrationNbtEntity> CODEC_V1 = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            Identifier.CODEC.fieldOf("id").forGetter(DialogueIllustrationNbtEntity::id),
+            ResourceLocation.CODEC.fieldOf("id").forGetter(DialogueIllustrationNbtEntity::id),
             FailingOptionalFieldCodec.of(IllustrationAnchor.CODEC, "anchor", IllustrationAnchor.TOP_LEFT).forGetter(DialogueIllustrationNbtEntity::anchor),
             Codec.INT.fieldOf("x").forGetter(DialogueIllustrationNbtEntity::x),
             Codec.INT.fieldOf("y").forGetter(DialogueIllustrationNbtEntity::y),
@@ -61,7 +61,7 @@ public record DialogueIllustrationNbtEntity(Identifier id, IllustrationAnchor an
             Codec.INT.fieldOf("entity_size").forGetter(DialogueIllustrationNbtEntity::entitySize),
             FailingOptionalFieldCodec.of(Codec.FLOAT, "y_offset", 0.0f).forGetter(DialogueIllustrationNbtEntity::yOffset),
             FailingOptionalFieldCodec.of(StareTarget.CODEC, "stare_at", StareTarget.FOLLOW_MOUSE).forGetter(DialogueIllustrationNbtEntity::stareAt),
-            FailingOptionalFieldCodec.of(NbtCompound.CODEC, "data").forGetter(DialogueIllustrationNbtEntity::data)
+            FailingOptionalFieldCodec.of(CompoundTag.CODEC, "data").forGetter(DialogueIllustrationNbtEntity::data)
     ).apply(instance, DialogueIllustrationNbtEntity::new));
     public static final Codec<DialogueIllustrationNbtEntity> CODEC = EitherMapCodec.alternatively(CODEC_V0, CODEC_V1).codec();
     public static final DialogueIllustrationType<DialogueIllustrationNbtEntity> TYPE = new DialogueIllustrationType<>(
@@ -76,7 +76,7 @@ public record DialogueIllustrationNbtEntity(Identifier id, IllustrationAnchor an
                     buf.readInt(),
                     buf.readFloat(),
                     new StareTarget(buf),
-                    buf.readOptional(PacketByteBuf::readNbt)
+                    buf.readOptional(FriendlyByteBuf::readNbt)
             ),
             (buf, i) -> {
                 buf.writeIdentifier(i.id());
@@ -88,7 +88,7 @@ public record DialogueIllustrationNbtEntity(Identifier id, IllustrationAnchor an
                 buf.writeInt(i.entitySize());
                 buf.writeFloat(i.yOffset());
                 StareTarget.writeToPacket(buf, i.stareAt());
-                buf.writeOptional(i.data(), PacketByteBuf::writeNbt);
+                buf.writeOptional(i.data(), FriendlyByteBuf::writeNbt);
             }
     );
 

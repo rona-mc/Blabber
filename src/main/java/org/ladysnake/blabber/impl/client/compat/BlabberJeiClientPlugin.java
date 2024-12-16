@@ -20,7 +20,7 @@ package org.ladysnake.blabber.impl.client.compat;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.ladysnake.blabber.Blabber;
 import org.ladysnake.blabber.api.client.BlabberDialogueScreen;
 import org.ladysnake.blabber.impl.client.BlabberRpgDialogueScreen;
@@ -28,7 +28,7 @@ import org.ladysnake.blabber.impl.client.BlabberRpgDialogueScreen;
 @JeiPlugin
 public class BlabberJeiClientPlugin implements IModPlugin {
     @Override
-    public Identifier getPluginUid() {
+    public ResourceLocation getPluginUid() {
         return Blabber.id("jei_remover");
     }
 

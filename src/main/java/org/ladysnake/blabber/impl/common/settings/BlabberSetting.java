@@ -17,15 +17,15 @@
  */
 package org.ladysnake.blabber.impl.common.settings;
 
-import net.minecraft.util.StringIdentifiable;
+import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public enum BlabberSetting implements StringIdentifiable {
+public enum BlabberSetting implements StringRepresentable {
     DEBUG_ANCHORS("debug.anchors");
-    public static final com.mojang.serialization.Codec<BlabberSetting> CODEC = StringIdentifiable.createCodec(BlabberSetting::values);
+    public static final com.mojang.serialization.Codec<BlabberSetting> CODEC = StringRepresentable.createCodec(BlabberSetting::values);
     private static final Map<String, BlabberSetting> index = new HashMap<>();
 
     static {

@@ -20,12 +20,12 @@ package org.ladysnake.blabber.impl.common.model;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.entity.Entity;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
-import net.minecraft.text.Texts;
-import net.minecraft.util.dynamic.Codecs;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.util.ExtraCodecs;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.ladysnake.blabber.impl.common.serialization.FailingOptionalFieldCodec;
@@ -35,28 +35,28 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public record DialogueChoice(Text text, List<String> illustrations, String next, Optional<DialogueChoiceCondition> condition) {
+public record DialogueChoice(Component text, List<String> illustrations, String next, Optional<DialogueChoiceCondition> condition) {
     public static final Codec<DialogueChoice> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codecs.TEXT.fieldOf("text").forGetter(DialogueChoice::text),
+            ExtraCodecs.TEXT.fieldOf("text").forGetter(DialogueChoice::text),
             FailingOptionalFieldCodec.of(Codec.list(Codec.STRING), "illustrations", Collections.emptyList()).forGetter(DialogueChoice::illustrations),
             Codec.STRING.fieldOf("next").forGetter(DialogueChoice::next),
             FailingOptionalFieldCodec.of(DialogueChoiceCondition.CODEC, "only_if").forGetter(DialogueChoice::condition)
     ).apply(instance, DialogueChoice::new));
 
-    public static void writeToPacket(PacketByteBuf buf, DialogueChoice choice) {
+    public static void writeToPacket(FriendlyByteBuf buf, DialogueChoice choice) {
         buf.writeText(choice.text());
-        buf.writeCollection(choice.illustrations(), PacketByteBuf::writeString);
+        buf.writeCollection(choice.illustrations(), FriendlyByteBuf::writeString);
         buf.writeString(choice.next());
         buf.writeOptional(choice.condition(), DialogueChoiceCondition::writeToPacket);
     }
 
-    public DialogueChoice(PacketByteBuf buf) {
-        this(buf.readText(), buf.readCollection(ArrayList::new, PacketByteBuf::readString), buf.readString(), buf.readOptional(DialogueChoiceCondition::new));
+    public DialogueChoice(FriendlyByteBuf buf) {
+        this(buf.readText(), buf.readCollection(ArrayList::new, FriendlyByteBuf::readString), buf.readString(), buf.readOptional(DialogueChoiceCondition::new));
     }
 
-    public DialogueChoice parseText(@Nullable ServerCommandSource source, @Nullable Entity sender) throws CommandSyntaxException {
+    public DialogueChoice parseText(@Nullable CommandSourceStack source, @Nullable Entity sender) throws CommandSyntaxException {
         Optional<DialogueChoiceCondition> parsedCondition = condition().isEmpty() ? Optional.empty() : Optional.of(condition().get().parseText(source, sender));
-        return new DialogueChoice(Texts.parse(source, text(), sender, 0), illustrations(), next(), parsedCondition);
+        return new DialogueChoice(ComponentUtils.parse(source, text(), sender, 0), illustrations(), next(), parsedCondition);
     }
 
     @Override

@@ -18,22 +18,22 @@
 package org.ladysnake.blabber.impl.common;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
 import org.ladysnake.blabber.DialogueAction;
 
 public record CommandDialogueAction(String command) implements DialogueAction {
     public static final Codec<CommandDialogueAction> CODEC = Codec.STRING.xmap(CommandDialogueAction::new, CommandDialogueAction::command);
 
     @Override
-    public void handle(ServerPlayerEntity player) {
+    public void handle(ServerPlayer player) {
         player.server.getCommandManager().executeWithPrefix(
                 getSource(player),
                 this.command()
         );
     }
 
-    public static ServerCommandSource getSource(ServerPlayerEntity player) {
+    public static CommandSourceStack getSource(ServerPlayer player) {
         return player.getCommandSource()
                 .withOutput(player.server)
                 .withLevel(2);

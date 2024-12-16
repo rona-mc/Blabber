@@ -20,13 +20,13 @@ package org.ladysnake.blabber.impl.client.illustrations;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.world.World;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import com.mojang.blaze3d.platform.Lighting;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -43,13 +43,13 @@ public abstract class EntityIllustrationRenderer<I extends DialogueIllustrationE
         super(illustration);
     }
 
-    protected abstract @Nullable LivingEntity getRenderedEntity(World world);
+    protected abstract @Nullable LivingEntity getRenderedEntity(Level world);
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void render(DrawContext context, TextRenderer textRenderer, PositionTransform positionTransform, int mouseX, int mouseY, float tickDelta) {
+    public void render(GuiGraphics context, Font textRenderer, PositionTransform positionTransform, int mouseX, int mouseY, float tickDelta) {
         LivingEntity e = this.renderedEntity == null
-                ? this.renderedEntity = this.getRenderedEntity(MinecraftClient.getInstance().world)
+                ? this.renderedEntity = this.getRenderedEntity(Minecraft.getInstance().world)
                 : this.renderedEntity;
 
         if (e == null) return; // Something went wrong creating the entity, so don't render.
@@ -76,7 +76,7 @@ public abstract class EntityIllustrationRenderer<I extends DialogueIllustrationE
     }
 
     // Copy-pasted from MC 1.20.4 InventoryScreen#drawEntity
-    public static void drawEntity(DrawContext context, int x1, int y1, int x2, int y2, int size, float f, float mouseX, float mouseY, LivingEntity entity) {
+    public static void drawEntity(GuiGraphics context, int x1, int y1, int x2, int y2, int size, float f, float mouseX, float mouseY, LivingEntity entity) {
         float g = (float)(x1 + x2) / 2.0F;
         float h = (float)(y1 + y2) / 2.0F;
         context.enableScissor(x1, y1, x2, y2);
@@ -107,14 +107,14 @@ public abstract class EntityIllustrationRenderer<I extends DialogueIllustrationE
         context.disableScissor();
     }
 
-    public static void drawEntity(DrawContext context, float x, float y, float size, Vector3f vector3f, Quaternionf quaternionf, @Nullable Quaternionf quaternionf2, LivingEntity entity) {
+    public static void drawEntity(GuiGraphics context, float x, float y, float size, Vector3f vector3f, Quaternionf quaternionf, @Nullable Quaternionf quaternionf2, LivingEntity entity) {
         context.getMatrices().push();
         context.getMatrices().translate(x, y, 50.0);
         context.getMatrices().multiplyPositionMatrix((new Matrix4f()).scaling(size, size, -size));
         context.getMatrices().translate(vector3f.x, vector3f.y, vector3f.z);
         context.getMatrices().multiply(quaternionf);
-        DiffuseLighting.method_34742();
-        EntityRenderDispatcher entityRenderDispatcher = MinecraftClient.getInstance().getEntityRenderDispatcher();
+        Lighting.method_34742();
+        EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
         if (quaternionf2 != null) {
             quaternionf2.conjugate();
             entityRenderDispatcher.setRotation(quaternionf2);
@@ -127,6 +127,6 @@ public abstract class EntityIllustrationRenderer<I extends DialogueIllustrationE
         context.draw();
         entityRenderDispatcher.setRenderShadows(true);
         context.getMatrices().pop();
-        DiffuseLighting.enableGuiDepthLighting();
+        Lighting.enableGuiDepthLighting();
     }
 }
