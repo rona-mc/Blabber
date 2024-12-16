@@ -30,12 +30,13 @@ import java.util.function.Function;
 
 /**
  * A type of {@link DialogueIllustration}, used for registration and abstraction.
+ *
  * @param <T> the DialogueIllustration type this type creates
  */
 public final class DialogueIllustrationType<T extends DialogueIllustration> {
     public static final Codec<DialogueIllustration> CODEC = RecursiveCodec.of("illustration_type", self ->
             EitherCodecButGood.alternatively(
-                    BlabberRegistrar.ILLUSTRATION_REGISTRY.getCodec()
+                    BlabberRegistrar.ILLUSTRATION_REGISTRY.byNameCodec()
                             .dispatch("type", DialogueIllustration::getType, DialogueIllustrationType::getCodec),
                     Codec.list(self).xmap(DialogueIllustrationCollection::new, DialogueIllustrationCollection::elements)
             )
@@ -60,6 +61,7 @@ public final class DialogueIllustrationType<T extends DialogueIllustration> {
 
     /**
      * Parses this type of DialogueIllustration from a packet. The data within should be everything the client needs to render this
+     *
      * @param buf the packet's data
      * @return a newly parsed DialogueIllustration corresponding to this type
      */
@@ -70,7 +72,8 @@ public final class DialogueIllustrationType<T extends DialogueIllustration> {
 
     /**
      * Write the data this illustration needs to be drawn client-side to a packet
-     * @param buf the packet to write to
+     *
+     * @param buf     the packet to write to
      * @param toWrite the illustration to write
      */
     @ApiStatus.Experimental
