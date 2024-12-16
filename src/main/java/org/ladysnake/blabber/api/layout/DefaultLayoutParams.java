@@ -19,7 +19,7 @@ package org.ladysnake.blabber.api.layout;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.ApiStatus;
 import org.ladysnake.blabber.impl.common.serialization.FailingOptionalFieldCodec;
 
@@ -32,7 +32,7 @@ public record DefaultLayoutParams(Optional<Margins> mainTextMargins) implements 
             FailingOptionalFieldCodec.of(Margins.CODEC, "main_text_margins").forGetter(DefaultLayoutParams::mainTextMargins)
     ).apply(instance, DefaultLayoutParams::new));
 
-    public DefaultLayoutParams(PacketByteBuf buf) {
+    public DefaultLayoutParams(FriendlyByteBuf buf) {
         this(buf.readOptional(Margins::new));
     }
 
@@ -40,7 +40,7 @@ public record DefaultLayoutParams(Optional<Margins> mainTextMargins) implements 
         return this.mainTextMargins.orElse(Margins.NONE);
     }
 
-    public static void writeToPacket(PacketByteBuf buf, DefaultLayoutParams params) {
+    public static void writeToPacket(FriendlyByteBuf buf, DefaultLayoutParams params) {
         buf.writeOptional(params.mainTextMargins(), Margins::writeToPacket);
     }
 }
