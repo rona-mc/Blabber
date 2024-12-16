@@ -21,8 +21,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import me.lucko.fabric.api.permissions.v0.Permissions;
-import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.command.argument.ResourceLocationArgumentType;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
@@ -40,7 +40,7 @@ import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 
 public final class DialogueSubCommand {
-    public static final DynamicCommandExceptionType INVALID_EXCEPTION = new DynamicCommandExceptionType(id -> Text.translatable("blabber:commands.dialogue.start.invalid", id.toString()));
+    public static final DynamicCommandExceptionType INVALID_EXCEPTION = new DynamicCommandExceptionType(id -> Component.translatable("blabber:commands.dialogue.start.invalid", id.toString()));
 
     public static final String DIALOGUE_SUBCOMMAND = "dialogue";
 
@@ -55,12 +55,12 @@ public final class DialogueSubCommand {
     private static LiteralArgumentBuilder<CommandSourceStack> dialogueStartCommand() {
         return literal("start")
                 .requires(Permissions.require("dialogue.start", 2))
-                .then(argument("dialogue", ResourceLocationArgumentType.ResourceLocation()).suggests(BlabberRegistrar.ALL_DIALOGUES)
-                        .executes(context -> startDialogue(context.getSource(), ResourceLocationArgumentType.getResourceLocation(context, "dialogue"), List.of(context.getSource().getPlayerOrThrow()), null))
-                        .then(argument("players", EntityArgumentType.players())
-                                .executes(context -> startDialogue(context.getSource(), ResourceLocationArgumentType.getResourceLocation(context, "dialogue"), EntityArgumentType.getPlayers(context, "players"), null))
-                                .then(argument("interlocutor", EntityArgumentType.entity())
-                                        .executes(context -> startDialogue(context.getSource(), ResourceLocationArgumentType.getResourceLocation(context, "dialogue"), EntityArgumentType.getPlayers(context, "players"), EntityArgumentType.getEntity(context, "interlocutor")))
+                .then(argument("dialogue", ResourceLocationArgument.id()).suggests(BlabberRegistrar.ALL_DIALOGUES)
+                        .executes(context -> startDialogue(context.getSource(), ResourceLocationArgument.getId(context, "dialogue"), List.of(context.getSource().getPlayer()), null))
+                        .then(argument("players", EntityArgument.players())
+                                .executes(context -> startDialogue(context.getSource(), ResourceLocationArgument.getId(context, "dialogue"), EntityArgument.getPlayers(context, "players"), null))
+                                .then(argument("interlocutor", EntityArgument.entity())
+                                        .executes(context -> startDialogue(context.getSource(), ResourceLocationArgument.getId(context, "dialogue"), EntityArgument.getPlayers(context, "players"), EntityArgument.getEntity(context, "interlocutor")))
                                 )
                         )
                 );
@@ -74,7 +74,7 @@ public final class DialogueSubCommand {
         int count = 0;
         for (ServerPlayer player : players) {
             PlayerDialogueTracker.get(player).startDialogue(dialogue, interlocutor);
-            source.sendFeedback(() -> Text.translatable("blabber:commands.dialogue.start.success", dialogue, player.getDisplayName()), true);
+            source.sendSuccess(() -> Component.translatable("blabber:commands.dialogue.start.success", dialogue, player.getDisplayName()), true);
             count++;
         }
 
