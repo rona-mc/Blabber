@@ -24,30 +24,29 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Components;
 import net.minecraft.util.ExtraCodecs;
 import org.jetbrains.annotations.Nullable;
 import org.ladysnake.blabber.impl.common.serialization.FailingOptionalFieldCodec;
 
 import java.util.Optional;
 
-public record UnavailableAction(UnavailableDisplay display, Optional<Text> message) {
+public record UnavailableAction(UnavailableDisplay display, Optional<Component> message) {
     public static final Codec<UnavailableAction> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             UnavailableDisplay.CODEC.fieldOf("display").forGetter(UnavailableAction::display),
-            FailingOptionalFieldCodec.of(Codecs.TEXT, "message").forGetter(UnavailableAction::message)
+            FailingOptionalFieldCodec.of(ExtraCodecs.COMPONENT, "message").forGetter(UnavailableAction::message)
     ).apply(instance, UnavailableAction::new));
 
     public UnavailableAction(FriendlyByteBuf buf) {
-        this(buf.readEnumConstant(UnavailableDisplay.class), buf.readOptional(FriendlyByteBuf::readText));
+        this(buf.readEnum(UnavailableDisplay.class), buf.readOptional(FriendlyByteBuf::readComponent));
     }
 
     public static void writeToPacket(FriendlyByteBuf buf, UnavailableAction action) {
-        buf.writeEnumConstant(action.display());
-        buf.writeOptional(action.message(), FriendlyByteBuf::writeText);
+        buf.writeEnum(action.display());
+        buf.writeOptional(action.message(), FriendlyByteBuf::writeComponent);
     }
 
     public UnavailableAction parseText(@Nullable CommandSourceStack source, @Nullable Entity sender) throws CommandSyntaxException {
-        Optional<Text> parsedMessage = message().isEmpty() ? Optional.empty() : Optional.of(Texts.parse(source, message().get(), sender, 0));
+        Optional<Component> parsedMessage = message().isEmpty() ? Optional.empty() : Optional.of(Component.translatable(message().get().getString(), source, sender, 0));
         return new UnavailableAction(display(), parsedMessage);
     }
 }

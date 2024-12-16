@@ -17,25 +17,37 @@
  */
 package org.ladysnake.blabber.impl.common.packets;
 
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.FriendlyByteBuf;
-import org.ladysnake.blabber.Blabber;
+import net.minecraftforge.network.NetworkEvent;
+import org.ladysnake.blabber.impl.common.DialogueScreenHandler;
 
-public record SelectedDialogueStatePacket(String stateKey) implements FabricPacket {
-    public static final PacketType<SelectedDialogueStatePacket> TYPE = PacketType.create(Blabber.id("selected_dialogue_state"), SelectedDialogueStatePacket::new);
+import java.util.function.Supplier;
+
+public class SelectedDialogueStatePacket {
+    private final String stateKey;
+
+    public SelectedDialogueStatePacket(String stateKey) {
+        this.stateKey = stateKey;
+    }
 
     public SelectedDialogueStatePacket(FriendlyByteBuf buf) {
         this(buf.readString());
     }
 
-    @Override
     public void write(FriendlyByteBuf buf) {
         buf.writeString(this.stateKey);
     }
 
-    @Override
-    public PacketType<?> getType() {
-        return TYPE;
+    public void handle(Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> {
+            if (ctx.get().getSender() != null && ctx.get().getSender().containerMenu instanceof DialogueScreenHandler dialogueHandler) {
+                dialogueHandler.selectState(stateKey);
+            }
+        });
+        ctx.get().setPacketHandled(true);
+    }
+
+    public String getStateKey() {
+        return stateKey;
     }
 }

@@ -22,18 +22,16 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.mojang.serialization.JsonOps;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
-import net.fabricmc.fabric.api.resource.SimpleResourceReloadListener;
-import net.minecraft.resource.LifecycledResourceManager;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.ResourceType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.profiler.Profiler;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.event.OnDatapackSyncEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import org.ladysnake.blabber.Blabber;
 import org.ladysnake.blabber.impl.common.model.DialogueTemplate;
 import org.ladysnake.blabber.impl.common.packets.DialogueListPacket;
@@ -44,80 +42,80 @@ import org.ladysnake.blabber.impl.common.validation.ValidationResult;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
-
-public final class DialogueLoader implements SimpleResourceReloadListener<Map<ResourceLocation, DialogueTemplate>>, ServerLifecycleEvents.EndDataPackReload {
+@Mod.EventBusSubscriber(modid = Blabber.MOD_ID)
+public final class DialogueLoader extends SimplePreparableReloadListener<Map<ResourceLocation, DialogueTemplate>> {
     public static final String BLABBER_DIALOGUES_PATH = "blabber/dialogues";
     public static final ResourceLocation ID = Blabber.id("dialogue_loader");
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final DialogueLoader INSTANCE = new DialogueLoader();
 
     public static void init() {
-        DialogueLoader instance = new DialogueLoader();
-        ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(instance);
-        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register(instance);
+        // Registration is handled by Forge events
     }
 
-    @Override
-    public CompletableFuture<Map<ResourceLocation, DialogueTemplate>> load(ResourceManager manager, Profiler profiler, Executor executor) {
-        return CompletableFuture.supplyAsync(() -> {
-            Map<ResourceLocation, DialogueTemplate> data = new HashMap<>();
-            manager.findResources(BLABBER_DIALOGUES_PATH, (res) -> res.getPath().endsWith(".json")).forEach((location, resource) -> {
-                try (Reader in = new InputStreamReader(resource.getInputStream())) {
-                    JsonObject jsonObject = GSON.fromJson(in, JsonObject.class);
-                    ResourceLocation id = new ResourceLocation(location.getNamespace(), location.getPath().substring(BLABBER_DIALOGUES_PATH.length() + 1, location.getPath().length() - 5));
-                    DialogueTemplate dialogue = DialogueTemplate.CODEC.parse(JsonOps.INSTANCE, jsonObject).getOrThrow(false, message -> Blabber.LOGGER.error("(Blabber) Could not parse dialogue file from {}: {}", location, message));
-                    ValidationResult result = DialogueValidator.validateStructure(dialogue);
-                    // TODO GIVE ME PATTERN MATCHING IN SWITCHES
-                    if (result instanceof ValidationResult.Error error) {
-                        Blabber.LOGGER.error("(Blabber) Could not validate dialogue {}: {}", id, error.message());
-                        throw new DialogueLoadingException("Could not validate dialogue file from " + location);
-                    } else if (result instanceof ValidationResult.Warnings warnings) {
-                        Blabber.LOGGER.warn("(Blabber) Dialogue {} had warnings: {}", id, warnings.message());
-                    }
-
-                    data.put(id, dialogue);
-                } catch (IOException | JsonParseException e) {
-                    Blabber.LOGGER.error("(Blabber) Could not read dialogue file from {}", location, e);
-                    throw new DialogueLoadingException("Could not read dialogue file from " + location, e);
-                }
-            });
-            return data;
-        }, executor);
+    @SubscribeEvent
+    public static void onAddReloadListeners(AddReloadListenerEvent event) {
+        event.addListener(INSTANCE);
     }
 
-    @Override
-    public CompletableFuture<Void> apply(Map<ResourceLocation, DialogueTemplate> data, ResourceManager manager, Profiler profiler, Executor executor) {
-        return CompletableFuture.runAsync(() -> DialogueRegistry.setEntries(data), executor);
-    }
-
-    @Override
-    public ResourceLocation getFabricId() {
-        return ID;
-    }
-
-    @Override
-    public Collection<ResourceLocation> getFabricDependencies() {
-        return Set.of(ResourceReloadListenerKeys.LOOT_TABLES);  // for dialogue choice predicates
-    }
-
-    @Override
-    public void endDataPackReload(MinecraftServer server, LifecycledResourceManager resourceManager, boolean success) {
-        if (success) {
-            Set<ResourceLocation> dialogueIds = DialogueRegistry.getIds();
-            DialogueListPacket idSyncPacket = new DialogueListPacket(dialogueIds);
-            for (ServerPlayer player : server.getPlayerManager().getPlayerList()) {
-                ServerPlayNetworking.send(player, idSyncPacket);
+    @SubscribeEvent
+    public static void onDatapackSync(OnDatapackSyncEvent event) {
+        Set<ResourceLocation> dialogueIds = DialogueRegistry.getIds();
+        if (event.getPlayer() != null) {
+            // Sync to specific player
+            BlabberRegistrar.NETWORK.sendTo(
+                new DialogueListPacket(dialogueIds),
+                event.getPlayer().connection.connection,
+                net.minecraftforge.network.NetworkDirection.PLAY_TO_CLIENT
+            );
+            PlayerDialogueTracker.get(event.getPlayer()).updateDialogue();
+        } else {
+            // Sync to all players
+            for (ServerPlayer player : event.getPlayerList().getPlayers()) {
+                BlabberRegistrar.NETWORK.sendTo(
+                    new DialogueListPacket(dialogueIds),
+                    player.connection.connection,
+                    net.minecraftforge.network.NetworkDirection.PLAY_TO_CLIENT
+                );
                 PlayerDialogueTracker.get(player).updateDialogue();
             }
         }
     }
 
-    private DialogueLoader() {}
+    @Override
+    protected Map<ResourceLocation, DialogueTemplate> prepare(ResourceManager manager, ProfilerFiller profiler) {
+        Map<ResourceLocation, DialogueTemplate> data = new HashMap<>();
+        manager.listResources(BLABBER_DIALOGUES_PATH, (res) -> res.getPath().endsWith(".json")).forEach((location, resource) -> {
+            try (Reader in = new InputStreamReader(resource.open())) {
+                JsonObject jsonObject = GSON.fromJson(in, JsonObject.class);
+                ResourceLocation id = new ResourceLocation(location.getNamespace(), location.getPath().substring(BLABBER_DIALOGUES_PATH.length() + 1, location.getPath().length() - 5));
+                DialogueTemplate dialogue = DialogueTemplate.CODEC.parse(JsonOps.INSTANCE, jsonObject).getOrThrow(false, message -> Blabber.LOGGER.error("(Blabber) Could not parse dialogue file from {}: {}", location, message));
+                ValidationResult result = DialogueValidator.validateStructure(dialogue);
+                // TODO GIVE ME PATTERN MATCHING IN SWITCHES
+                if (result instanceof ValidationResult.Error error) {
+                    Blabber.LOGGER.error("(Blabber) Could not validate dialogue {}: {}", id, error.message());
+                    throw new DialogueLoadingException("Could not validate dialogue file from " + location);
+                } else if (result instanceof ValidationResult.Warnings warnings) {
+                    Blabber.LOGGER.warn("(Blabber) Dialogue {} had warnings: {}", id, warnings.message());
+                }
 
+                data.put(id, dialogue);
+            } catch (IOException | JsonParseException e) {
+                Blabber.LOGGER.error("(Blabber) Could not read dialogue file from {}", location, e);
+                throw new DialogueLoadingException("Could not read dialogue file from " + location, e);
+            }
+        });
+        return data;
+    }
+
+    @Override
+    protected void apply(Map<ResourceLocation, DialogueTemplate> data, ResourceManager manager, ProfilerFiller profiler) {
+        DialogueRegistry.setEntries(data);
+    }
+
+    private DialogueLoader() {}
 }

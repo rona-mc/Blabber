@@ -19,11 +19,14 @@ package org.ladysnake.blabber.impl.common.commands;
 
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.chat.Component;
+import net.minecraftforge.server.permission.PermissionAPI;
+import net.minecraftforge.server.permission.nodes.PermissionNode;
+import net.minecraftforge.server.permission.nodes.PermissionTypes;
 import org.jetbrains.annotations.NotNull;
+import org.ladysnake.blabber.Blabber;
 import org.ladysnake.blabber.impl.common.settings.BlabberSetting;
 import org.ladysnake.blabber.impl.common.settings.BlabberSettingsComponent;
 
@@ -35,7 +38,16 @@ import static net.minecraft.commands.Commands.literal;
 public final class SettingsSubCommand {
     public static final String SETTINGS_SUBCOMMAND = "settings";
     public static final String SETTINGS_SET_SUBCOMMAND = "set";
-    public static final @NotNull Predicate<CommandSourceStack> ALLOW_DEBUG = Permissions.require("dialogue.debug", 2);
+    
+    public static final PermissionNode<Boolean> DIALOGUE_DEBUG = new PermissionNode<>(
+        Blabber.MOD_ID,
+        "dialogue.debug",
+        PermissionTypes.BOOLEAN,
+        (player, uuid, contexts) -> player != null && player.hasPermissions(2)
+    );
+
+    public static final @NotNull Predicate<CommandSourceStack> ALLOW_DEBUG = source -> 
+        source.hasPermission(2) && (source.getPlayer() == null || PermissionAPI.getPermission(source.getPlayer(), DIALOGUE_DEBUG));
 
     static LiteralArgumentBuilder<CommandSourceStack> settingsSubtree() {
         return literal(SETTINGS_SUBCOMMAND)
@@ -43,7 +55,7 @@ public final class SettingsSubCommand {
                 .then(literal(SETTINGS_SET_SUBCOMMAND).then(
                         argument("setting", SettingArgumentType.setting())
                                 .then(argument("value", BoolArgumentType.bool())
-                                        .executes(context -> setEnabled(context.getSource(), context.getSource().getPlayer(), SettingArgumentType.getSetting(context, "setting"), BoolArgumentType.getBool(context, "value")))
+                                        .executes(context -> setEnabled(context.getSource(), context.getSource().getPlayerOrException(), SettingArgumentType.getSetting(context, "setting"), BoolArgumentType.getBool(context, "value")))
                                 )
                 ));
     }

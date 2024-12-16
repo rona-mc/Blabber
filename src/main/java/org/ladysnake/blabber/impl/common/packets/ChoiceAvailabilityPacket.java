@@ -19,22 +19,26 @@ package org.ladysnake.blabber.impl.common.packets;
 
 import it.unimi.dsi.fastutil.ints.Int2BooleanMap;
 import it.unimi.dsi.fastutil.ints.Int2BooleanOpenHashMap;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.FriendlyByteBuf;
-import org.ladysnake.blabber.Blabber;
+import net.minecraftforge.network.NetworkEvent;
+import org.ladysnake.blabber.impl.common.DialogueScreenHandler;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Represents a list of dialogue choices which availability has changed
  */
-public record ChoiceAvailabilityPacket(Map<String, Int2BooleanMap> updatedChoices) implements FabricPacket {
-    public static final PacketType<ChoiceAvailabilityPacket> TYPE = PacketType.create(Blabber.id("choice_availability"), ChoiceAvailabilityPacket::new);
+public class ChoiceAvailabilityPacket {
+    private final Map<String, Int2BooleanMap> updatedChoices;
 
     public ChoiceAvailabilityPacket() {
         this(new HashMap<>());
+    }
+
+    public ChoiceAvailabilityPacket(Map<String, Int2BooleanMap> updatedChoices) {
+        this.updatedChoices = updatedChoices;
     }
 
     public ChoiceAvailabilityPacket(FriendlyByteBuf buf) {
@@ -44,21 +48,28 @@ public record ChoiceAvailabilityPacket(Map<String, Int2BooleanMap> updatedChoice
         ));
     }
 
-    @Override
     public void write(FriendlyByteBuf buf) {
         buf.writeMap(
-                this.updatedChoices(),
+                this.updatedChoices,
                 FriendlyByteBuf::writeString,
                 (b, updatedChoices) -> b.writeMap(updatedChoices, FriendlyByteBuf::writeVarInt, FriendlyByteBuf::writeBoolean)
         );
     }
 
-    @Override
-    public PacketType<?> getType() {
-        return TYPE;
+    public void handle(Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> {
+            if (ctx.get().getSender() != null && ctx.get().getSender().containerMenu instanceof DialogueScreenHandler dialogueHandler) {
+                dialogueHandler.handleAvailabilityUpdate(this);
+            }
+        });
+        ctx.get().setPacketHandled(true);
+    }
+
+    public Map<String, Int2BooleanMap> updatedChoices() {
+        return this.updatedChoices;
     }
 
     public void markUpdated(String stateKey, int choiceIndex, boolean newValue) {
-        this.updatedChoices().computeIfAbsent(stateKey, s -> new Int2BooleanOpenHashMap()).put(choiceIndex, newValue);
+        this.updatedChoices.computeIfAbsent(stateKey, s -> new Int2BooleanOpenHashMap()).put(choiceIndex, newValue);
     }
 }

@@ -18,16 +18,25 @@
 package org.ladysnake.blabber.impl.common.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
-import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraftforge.server.permission.PermissionAPI;
+import net.minecraftforge.server.permission.nodes.PermissionNode;
+import net.minecraftforge.server.permission.nodes.PermissionTypes;
 import org.ladysnake.blabber.Blabber;
 
 import static net.minecraft.commands.Commands.literal;
 
 public final class BlabberCommand {
+    public static final PermissionNode<Boolean> DIALOGUE_START = new PermissionNode<>(
+        Blabber.MOD_ID,
+        "dialogue.start",
+        PermissionTypes.BOOLEAN,
+        (player, uuid, contexts) -> player != null && player.hasPermissions(2)
+    );
+
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(literal(Blabber.MOD_ID)
-            .requires(Permissions.require("dialogue.start", 2))
+            .requires(source -> source.hasPermission(2) && (source.getPlayer() == null || PermissionAPI.getPermission(source.getPlayer(), DIALOGUE_START)))
             .then(DialogueSubCommand.dialogueSubtree())
             .then(SettingsSubCommand.settingsSubtree())
         );

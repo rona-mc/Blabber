@@ -24,7 +24,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Components;
 import net.minecraft.util.ExtraCodecs;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
@@ -38,7 +37,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 public record DialogueState(
-        Text text,
+        Component text,
         List<String> illustrations,
         List<DialogueChoice> choices,
         Optional<InstancedDialogueAction<?>> action,
@@ -46,7 +45,7 @@ public record DialogueState(
 ) {
     public static final Codec<DialogueState> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             // Kinda optional, but we still want errors if you got it wrong >:(
-            FailingOptionalFieldCodec.of(Codecs.TEXT, "text", Text.empty()).forGetter(DialogueState::text),
+            FailingOptionalFieldCodec.of(ExtraCodecs.COMPONENT, "text", Component.empty()).forGetter(DialogueState::text),
             FailingOptionalFieldCodec.of(Codec.list(Codec.STRING), "illustrations", Collections.emptyList()).forGetter(DialogueState::illustrations),
             FailingOptionalFieldCodec.of(Codec.list(DialogueChoice.CODEC), "choices", List.of()).forGetter(DialogueState::choices),
             FailingOptionalFieldCodec.of(InstancedDialogueAction.CODEC, "action").forGetter(DialogueState::action),
@@ -54,15 +53,15 @@ public record DialogueState(
     ).apply(instance, DialogueState::new));
 
     public static void writeToPacket(FriendlyByteBuf buf, DialogueState state) {
-        buf.writeText(state.text());
+        buf.writeComponent(state.text());
         buf.writeCollection(state.illustrations(), FriendlyByteBuf::writeString);
         buf.writeCollection(state.choices(), DialogueChoice::writeToPacket);
-        buf.writeEnumConstant(state.type());
+        buf.writeEnum(state.type());
         // not writing the action, the client most likely does not need to know about it
     }
 
     public DialogueState(FriendlyByteBuf buf) {
-        this(buf.readText(), buf.readCollection(ArrayList::new, FriendlyByteBuf::readString), buf.readList(DialogueChoice::new), Optional.empty(), buf.readEnumConstant(ChoiceResult.class));
+        this(buf.readComponent(), buf.readCollection(ArrayList::new, FriendlyByteBuf::readString), buf.readList(DialogueChoice::new), Optional.empty(), buf.readEnum(ChoiceResult.class));
     }
 
     public String getNextState(int choice) {
@@ -76,7 +75,7 @@ public record DialogueState(
         }
 
         return new DialogueState(
-                Texts.parse(source, text(), sender, 0),
+                Component.translatable(text().getString(), source, sender, 0),
                 illustrations(),
                 parsedChoices,
                 action(),

@@ -22,13 +22,13 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.command.EntitySelector;
-import net.minecraft.command.EntitySelectorReader;
+import net.minecraft.commands.arguments.selector.EntitySelector;
+import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import org.ladysnake.blabber.api.illustration.DialogueIllustrationType;
 import org.ladysnake.blabber.impl.common.model.IllustrationAnchor;
@@ -68,9 +68,9 @@ public class DialogueIllustrationSelectorEntity implements DialogueIllustrationE
         this.selectedEntityId = selectedEntityId;
     }
 
-    public LivingEntity getSelectedEntity(World world) {
+    public LivingEntity getSelectedEntity(Level world) {
         if (this.selectedEntityId == -1) return null; // shortcut
-        Entity e = world.getEntityById(this.selectedEntityId);
+        Entity e = world.getEntity(this.selectedEntityId);
         return e instanceof LivingEntity living ? living : null;
     }
 
@@ -126,8 +126,8 @@ public class DialogueIllustrationSelectorEntity implements DialogueIllustrationE
     @Override
     public DialogueIllustrationSelectorEntity parseText(@Nullable CommandSourceStack source, @Nullable Entity sender) throws CommandSyntaxException {
         if (source != null) {
-            EntitySelector entitySelector = new EntitySelectorReader(new StringReader(spec().selector())).read();
-            Entity e = entitySelector.getEntity(source);
+            EntitySelector entitySelector = new EntitySelectorParser(new StringReader(spec().selector())).parse();
+            Entity e = entitySelector.findSingleEntity(source);
             if (e instanceof LivingEntity living) {
                 this.selectedEntityId = living.getId();
             }

@@ -24,30 +24,30 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.loot.condition.LootCondition;
-import net.minecraft.loot.condition.LootConditionType;
-import net.minecraft.loot.context.LootContext;
-import net.minecraft.loot.context.LootContextParameter;
-import net.minecraft.loot.context.LootContextParameters;
-import net.minecraft.predicate.entity.EntityPredicate;
-import net.minecraft.util.JsonSerializer;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.Serializer;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
+import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.util.ExtraCodecs;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Optional;
 import java.util.Set;
 
-public record InterlocutorPropertiesLootCondition(EntityPredicate predicate) implements LootCondition {
+public record InterlocutorPropertiesLootCondition(EntityPredicate predicate) implements LootItemCondition {
     public static final Codec<InterlocutorPropertiesLootCondition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        Codecs.JSON_ELEMENT.xmap(EntityPredicate::fromJson, EntityPredicate::toJson)
+        ExtraCodecs.JSON_ELEMENT.xmap(EntityPredicate::fromJson, EntityPredicate::toJson)
                            .fieldOf("predicate")
                            .forGetter(InterlocutorPropertiesLootCondition::predicate)
     ).apply(instance, InterlocutorPropertiesLootCondition::new));
 
-    public static final LootConditionType TYPE =
-        new LootConditionType(new JsonSerializer<InterlocutorPropertiesLootCondition>() {
+    public static final LootItemConditionType TYPE =
+        new LootItemConditionType(new Serializer<InterlocutorPropertiesLootCondition>() {
             @Override
-            public void toJson(
+            public void serialize(
                 final JsonObject json,
                 final InterlocutorPropertiesLootCondition object,
                 final JsonSerializationContext context
@@ -60,7 +60,7 @@ public record InterlocutorPropertiesLootCondition(EntityPredicate predicate) imp
             }
 
             @Override
-            public InterlocutorPropertiesLootCondition fromJson(
+            public InterlocutorPropertiesLootCondition deserialize(
                 final JsonObject json,
                 final JsonDeserializationContext context
             ) {
@@ -69,20 +69,20 @@ public record InterlocutorPropertiesLootCondition(EntityPredicate predicate) imp
         });
 
     @Override
-    public LootConditionType getType() {
+    public LootItemConditionType getType() {
         return TYPE;
     }
 
     @Override
-    public Set<LootContextParameter<?>> getRequiredParameters() {
-        return Set.of(LootContextParameters.ORIGIN);
+    public Set<LootContextParam<?>> getReferencedContextParams() {
+        return Set.of(LootContextParams.ORIGIN);
     }
 
     @Override
     public boolean test(LootContext lootContext) {
-        Entity entity = lootContext.get(LootContext.EntityTarget.THIS.getParameter());
-        Vec3d origin = lootContext.get(LootContextParameters.ORIGIN);
+        Entity entity = lootContext.getParamOrNull(LootContext.EntityTarget.THIS.getParam());
+        Vec3 origin = lootContext.getParamOrNull(LootContextParams.ORIGIN);
         Optional<Entity> interlocutor = PlayerDialogueTracker.KEY.maybeGet(entity).flatMap(PlayerDialogueTracker::getInterlocutor);
-        return interlocutor.isPresent() && this.predicate.test(lootContext.getWorld(), origin, interlocutor.get());
+        return interlocutor.isPresent() && this.predicate.matches(lootContext.getLevel(), origin, interlocutor.get());
     }
 }
