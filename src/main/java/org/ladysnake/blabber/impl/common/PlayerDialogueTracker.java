@@ -19,37 +19,32 @@ package org.ladysnake.blabber.impl.common;
 
 import com.google.common.base.Preconditions;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import dev.onyxstudios.cca.api.v3.component.ComponentKey;
+import dev.onyxstudios.cca.api.v3.component.ComponentRegistry;
+import dev.onyxstudios.cca.api.v3.component.tick.ServerTickingComponent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import net.minecraft.world.level.storage.loot.LootParams;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.common.capabilities.CapabilityToken;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 import org.ladysnake.blabber.Blabber;
 import org.ladysnake.blabber.impl.common.machine.DialogueStateMachine;
 import org.ladysnake.blabber.impl.common.model.DialogueTemplate;
 import org.ladysnake.blabber.impl.common.packets.ChoiceAvailabilityPacket;
+import net.minecraft.nbt.Tag;
 
 import java.util.Optional;
 import java.util.UUID;
 
-@Mod.EventBusSubscriber(modid = Blabber.MOD_ID)
-public final class PlayerDialogueTracker {
-    public static final Capability<PlayerDialogueTracker> CAPABILITY = CapabilityManager.get(new CapabilityToken<>(){});
+public final class PlayerDialogueTracker implements ServerTickingComponent {
+    public static final ComponentKey<PlayerDialogueTracker> KEY = ComponentRegistry.getOrCreate(Blabber.id("dialogue_tracker"), PlayerDialogueTracker.class);
 
     private final Player player;
     private @Nullable DialogueStateMachine currentDialogue;
@@ -62,8 +57,7 @@ public final class PlayerDialogueTracker {
     }
 
     public static PlayerDialogueTracker get(Player player) {
-        LazyOptional<PlayerDialogueTracker> cap = player.getCapability(CAPABILITY);
-        return cap.orElseThrow(() -> new IllegalStateException("Player " + player.getScoreboardName() + " does not have dialogue tracker capability"));
+        return KEY.get(player);
     }
 
     public void startDialogue(ResourceLocation id, @Nullable Entity interlocutor) throws CommandSyntaxException {
@@ -126,7 +120,8 @@ public final class PlayerDialogueTracker {
         }
     }
 
-    public void deserializeNBT(CompoundTag tag) {
+    @Override
+    public void readFromNbt(CompoundTag tag) {
         if (tag.contains("current_dialogue_id", Tag.TAG_STRING)) {
             ResourceLocation dialogueId = ResourceLocation.tryParse(tag.getString("current_dialogue_id"));
             if (dialogueId != null) {
@@ -140,8 +135,8 @@ public final class PlayerDialogueTracker {
         }
     }
 
-    public CompoundTag serializeNBT() {
-        CompoundTag tag = new CompoundTag();
+    @Override
+    public void writeToNbt(CompoundTag tag) {
         if (this.currentDialogue != null) {
             tag.putString("current_dialogue_id", this.currentDialogue.getId().toString());
             tag.putString("current_dialogue_state", this.currentDialogue.getCurrentStateKey());
@@ -149,17 +144,10 @@ public final class PlayerDialogueTracker {
                 tag.putUUID("interlocutor", this.interlocutor.getUUID());
             }
         }
-        return tag;
     }
 
-    @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase == TickEvent.Phase.END && !event.player.level().isClientSide) {
-            get(event.player).serverTick();
-        }
-    }
-
-    private void serverTick() {
+    @Override
+    public void serverTick() {
         DeserializedState saved = this.deserializedState;
         ServerPlayer serverPlayer = (ServerPlayer) this.player;
         if (saved != null) {
@@ -222,11 +210,6 @@ public final class PlayerDialogueTracker {
     private void openDialogueScreen() {
         Preconditions.checkState(this.currentDialogue != null);
         this.player.openMenu((MenuProvider) new DialogueScreenHandlerFactory(this.currentDialogue, Component.literal("Blabber Dialogue Screen"), this.interlocutor));
-    }
-
-    public void copyFrom(PlayerDialogueTracker old) {
-        CompoundTag nbt = old.serializeNBT();
-        this.deserializeNBT(nbt);
     }
 
     private record DeserializedState(ResourceLocation dialogueId, DialogueTemplate template, String selectedState, @Nullable UUID interlocutorUuid) { }
