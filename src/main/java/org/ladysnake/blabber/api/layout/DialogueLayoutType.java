@@ -29,6 +29,7 @@ import java.util.function.Function;
 
 @ApiStatus.Experimental
 public class DialogueLayoutType<P extends DialogueLayout.Params> {
+    // TODO
     public static final Codec<DialogueLayout<?>> CODEC = BlabberRegistrar.LAYOUT_REGISTRY.getCodec().dispatch(
             "type", DialogueLayout::type, DialogueLayoutType::getCodec
     );
@@ -59,7 +60,7 @@ public class DialogueLayoutType<P extends DialogueLayout.Params> {
      */
     @ApiStatus.Experimental
     public static <P extends DialogueLayout.Params> DialogueLayout<P> readFromPacket(FriendlyByteBuf buf) {
-        @SuppressWarnings("unchecked") DialogueLayoutType<P> type = (DialogueLayoutType<P>) buf.readRegistryValue(BlabberRegistrar.LAYOUT_REGISTRY);
+        @SuppressWarnings("unchecked") DialogueLayoutType<P> type = (DialogueLayoutType<P>) buf.readById(BlabberRegistrar.LAYOUT_REGISTRY);
         assert type != null;
         return new DialogueLayout<>(type, type.read.apply(buf));
     }
@@ -71,7 +72,7 @@ public class DialogueLayoutType<P extends DialogueLayout.Params> {
      */
     @ApiStatus.Experimental
     public static <P extends DialogueLayout.Params> void writeToPacket(FriendlyByteBuf buf, DialogueLayout<P> toWrite) {
-        buf.writeRegistryValue(BlabberRegistrar.LAYOUT_REGISTRY, toWrite.type());
+        buf.writeId(BlabberRegistrar.LAYOUT_REGISTRY, toWrite.type());
         toWrite.type().write.accept(buf, toWrite.params());
     }
 }
