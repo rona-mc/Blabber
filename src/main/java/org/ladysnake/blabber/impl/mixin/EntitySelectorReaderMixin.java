@@ -36,7 +36,7 @@ public abstract class EntitySelectorReaderMixin {
     private boolean blabber$interlocutorSelector;
 
     @SuppressWarnings("InvalidInjectorMethodSignature")
-    @ModifyVariable(method = "readAtVariable", at = @At(value = "INVOKE_ASSIGN", target = "Lcom/mojang/brigadier/StringReader;read()C", remap = false), allow = 1)
+    @ModifyVariable(method = "parseSelector", at = @At(value = "INVOKE_ASSIGN", target = "Lcom/mojang/brigadier/StringReader;read()C", remap = false), allow = 1)
     private char parseInterlocutor(char selector) {
         if (selector == 'i') {
             int cursor = this.reader.getCursor();
@@ -53,7 +53,7 @@ public abstract class EntitySelectorReaderMixin {
         return selector;
     }
 
-    @Inject(method = "build", at = @At("RETURN"))
+    @Inject(method = "getSelector", at = @At("RETURN"))
     private void configureInterlocutor(CallbackInfoReturnable<BlabberEntitySelectorExt> cir) {
         cir.getReturnValue().blabber$setInterlocutorSelector(this.blabber$interlocutorSelector);
     }

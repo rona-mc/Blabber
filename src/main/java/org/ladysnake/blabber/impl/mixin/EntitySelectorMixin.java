@@ -36,10 +36,11 @@ public abstract class EntitySelectorMixin implements BlabberEntitySelectorExt {
     @Unique
     private boolean blabber$interlocutorSelector;
 
-    @Inject(method = "getUnfilteredEntities", at = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelector;senderOnly:Z"), cancellable = true)
+    @Inject(method = "findEntitiesRaw", at = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/EntitySelector;currentEntity:Z"), cancellable = true)
     private void replaceSelf(CommandSourceStack source, CallbackInfoReturnable<List<? extends Entity>> cir) throws CommandSyntaxException {
         if (this.blabber$interlocutorSelector) {
-            cir.setReturnValue(source.getPlayerOrThrow().getComponent(PlayerDialogueTracker.KEY).getInterlocutor().map(List::of).orElse(List.of()));
+            // TODO
+            cir.setReturnValue(source.getPlayer().getComponent(PlayerDialogueTracker.KEY).getInterlocutor().map(List::of).orElse(List.of()));
         }
     }
 

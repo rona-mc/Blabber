@@ -17,6 +17,7 @@
  */
 package org.ladysnake.blabber.impl.mixin.client.compat.emi;
 
+/*
 import dev.emi.emi.screen.EmiScreenManager;
 import net.minecraft.client.Minecraft;
 import org.ladysnake.blabber.api.client.BlabberDialogueScreen;
@@ -37,3 +38,4 @@ public class EmiScreenManagerMixin {
         }
     }
 }
+ */
