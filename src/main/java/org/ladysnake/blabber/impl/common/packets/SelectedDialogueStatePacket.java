@@ -31,11 +31,11 @@ public class SelectedDialogueStatePacket {
     }
 
     public SelectedDialogueStatePacket(FriendlyByteBuf buf) {
-        this(buf.readString());
+        this(buf.readUtf());
     }
 
     public void write(FriendlyByteBuf buf) {
-        buf.writeString(this.stateKey);
+        buf.writeUtf(this.stateKey);
     }
 
     public void handle(Supplier<NetworkEvent.Context> ctx) {

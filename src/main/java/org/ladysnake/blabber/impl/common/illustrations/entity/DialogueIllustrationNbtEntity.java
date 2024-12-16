@@ -68,7 +68,7 @@ public record DialogueIllustrationNbtEntity(ResourceLocation id, IllustrationAnc
             CODEC,
             buf -> new DialogueIllustrationNbtEntity(
                     buf.readResourceLocation(),
-                    buf.readEnumConstant(IllustrationAnchor.class),
+                    buf.readEnum(IllustrationAnchor.class),
                     buf.readInt(),
                     buf.readInt(),
                     buf.readInt(),
@@ -80,7 +80,7 @@ public record DialogueIllustrationNbtEntity(ResourceLocation id, IllustrationAnc
             ),
             (buf, i) -> {
                 buf.writeResourceLocation(i.id());
-                buf.writeEnumConstant(i.anchor());
+                buf.writeEnum(i.anchor());
                 buf.writeInt(i.x());
                 buf.writeInt(i.y());
                 buf.writeInt(i.width());

@@ -107,7 +107,7 @@ public record DialogueIllustrationFakePlayer(GameProfile profile,
         static {
             partsByName = new HashMap<>();
             for (PlayerModelPart part : PlayerModelPart.values()) {
-                partsByName.put(part.getName(), part);
+                partsByName.put(part.getName().toString(), part);
             }
         }
 

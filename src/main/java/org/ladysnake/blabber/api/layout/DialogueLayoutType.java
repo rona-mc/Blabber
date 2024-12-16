@@ -59,7 +59,7 @@ public class DialogueLayoutType<P extends DialogueLayout.Params> {
      */
     @ApiStatus.Experimental
     public static <P extends DialogueLayout.Params> DialogueLayout<P> readFromPacket(FriendlyByteBuf buf) {
-        @SuppressWarnings("unchecked") DialogueLayoutType<P> type = (DialogueLayoutType<P>) buf.readRegistryValue(BlabberRegistrar.LAYOUT_REGISTRY);
+        @SuppressWarnings("unchecked") DialogueLayoutType<P> type = (DialogueLayoutType<P>) buf.readById(BlabberRegistrar.LAYOUT_REGISTRY);
         assert type != null;
         return new DialogueLayout<>(type, type.read.apply(buf));
     }
@@ -71,7 +71,7 @@ public class DialogueLayoutType<P extends DialogueLayout.Params> {
      */
     @ApiStatus.Experimental
     public static <P extends DialogueLayout.Params> void writeToPacket(FriendlyByteBuf buf, DialogueLayout<P> toWrite) {
-        buf.writeRegistryValue(BlabberRegistrar.LAYOUT_REGISTRY, toWrite.type());
+        buf.writeId(BlabberRegistrar.LAYOUT_REGISTRY, toWrite.type());
         toWrite.type().write.accept(buf, toWrite.params());
     }
 }

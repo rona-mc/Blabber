@@ -43,7 +43,7 @@ public class ChoiceAvailabilityPacket {
 
     public ChoiceAvailabilityPacket(FriendlyByteBuf buf) {
         this(buf.readMap(
-                FriendlyByteBuf::readString,
+                FriendlyByteBuf::readUtf,
                 b -> b.readMap(Int2BooleanOpenHashMap::new, FriendlyByteBuf::readVarInt, FriendlyByteBuf::readBoolean)
         ));
     }
