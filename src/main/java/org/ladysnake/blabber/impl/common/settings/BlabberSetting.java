@@ -25,7 +25,7 @@ import java.util.Map;
 
 public enum BlabberSetting implements StringRepresentable {
     DEBUG_ANCHORS("debug.anchors");
-    public static final com.mojang.serialization.Codec<BlabberSetting> CODEC = StringRepresentable.createCodec(BlabberSetting::values);
+    public static final com.mojang.serialization.Codec<BlabberSetting> CODEC = StringRepresentable.fromEnum(BlabberSetting::values);
     private static final Map<String, BlabberSetting> index = new HashMap<>();
 
     static {
@@ -49,7 +49,7 @@ public enum BlabberSetting implements StringRepresentable {
     }
 
     @Override
-    public String asString() {
+    public String getSerializedName() {
         return this.id;
     }
 }
