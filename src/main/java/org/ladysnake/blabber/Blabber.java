@@ -22,8 +22,8 @@ import com.mojang.serialization.Codec;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.registry.Registry;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.Registry;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.chat.Component;
@@ -60,10 +60,10 @@ public final class Blabber {
     /**
      * Starts a dialogue
      *
-     * <p>This operation closes the player's {@linkplain  PlayerEntity#currentScreenHandler current screen handler},
+     * <p>This operation closes the player's {@linkplain  Player#currentScreenHandler current screen handler},
      * if any, and opens a new dialogue screen instead.
      *
-     * <p>A dialogue may fail to start if it contains malformed texts as per {@link net.minecraft.network.chat.Components#parse(CommandSourceStack, Text, Entity, int)}.
+     * <p>A dialogue may fail to start if it contains malformed texts as per {@link net.minecraft.network.chat.Component#parse(CommandSourceStack, Component, Entity, int)}.
      * In that case, this method will throw a {@link DialogueInitializationException}.
      *
      * @param player the player for whom to initiate a dialogue
@@ -78,10 +78,10 @@ public final class Blabber {
     /**
      * Starts a dialogue
      *
-     * <p>This operation closes the player's {@linkplain  PlayerEntity#currentScreenHandler current screen handler},
+     * <p>This operation closes the player's {@linkplain  Player#currentScreenHandler current screen handler},
      * if any, and opens a new dialogue screen instead.
      *
-     * <p>A dialogue may fail to start if it contains malformed texts as per {@link net.minecraft.network.chat.Components#parse(CommandSourceStack, Text, Entity, int)}.
+     * <p>A dialogue may fail to start if it contains malformed texts as per {@link net.minecraft.network.chat.Component#parse(CommandSourceStack, Component, Entity, int)}.
      * In that case, this method will throw a {@link DialogueInitializationException}.
      *
      * @param player the player for whom to initiate a dialogue
