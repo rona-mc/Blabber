@@ -18,7 +18,7 @@
 package org.ladysnake.blabber.impl.mixin;
 
 import com.mojang.brigadier.StringReader;
-import net.minecraft.command.EntitySelectorReader;
+import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import org.ladysnake.blabber.impl.common.BlabberEntitySelectorExt;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -29,14 +29,14 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(EntitySelectorReader.class)
+@Mixin(EntitySelectorParser.class)
 public abstract class EntitySelectorReaderMixin {
     @Shadow @Final private StringReader reader;
     @Unique
     private boolean blabber$interlocutorSelector;
 
     @SuppressWarnings("InvalidInjectorMethodSignature")
-    @ModifyVariable(method = "readAtVariable", at = @At(value = "INVOKE_ASSIGN", target = "Lcom/mojang/brigadier/StringReader;read()C", remap = false), allow = 1)
+    @ModifyVariable(method = "parseSelector", at = @At(value = "INVOKE_ASSIGN", target = "Lcom/mojang/brigadier/StringReader;read()C", remap = false), allow = 1)
     private char parseInterlocutor(char selector) {
         if (selector == 'i') {
             int cursor = this.reader.getCursor();
