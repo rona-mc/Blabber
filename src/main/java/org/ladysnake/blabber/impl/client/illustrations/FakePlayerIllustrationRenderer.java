@@ -18,8 +18,6 @@
 package org.ladysnake.blabber.impl.client.illustrations;
 
 import com.mojang.authlib.GameProfile;
-//import net.fabricmc.api.EnvType;
-//import net.fabricmc.api.Environment;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -36,7 +34,6 @@ public class FakePlayerIllustrationRenderer extends EntityIllustrationRenderer<D
     }
 
     @SuppressWarnings("UnreachableCode")
-    @Environment(EnvType.CLIENT) // TODO
     @Override
     protected @Nullable LivingEntity getRenderedEntity(Level world) {
         GameProfile profile = this.illustration.profile();
