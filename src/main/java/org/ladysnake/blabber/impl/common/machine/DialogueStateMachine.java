@@ -23,9 +23,9 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import it.unimi.dsi.fastutil.ints.Int2BooleanMap;
 import it.unimi.dsi.fastutil.ints.Int2BooleanMaps;
 import it.unimi.dsi.fastutil.ints.Int2BooleanOpenHashMap;
-import net.minecraft.loot.LootDataType;
-import net.minecraft.loot.condition.LootCondition;
-import net.minecraft.loot.context.LootContext;
+import net.minecraft.world.level.storage.loot.LootDataType;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -53,7 +53,7 @@ import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 public final class DialogueStateMachine {
-    private static final DynamicCommandExceptionType INVALID_PREDICATE_EXCEPTION = new DynamicCommandExceptionType(id -> Text.translatable("blabber:commands.dialogue.start.predicate.invalid", String.valueOf(id)));
+    private static final DynamicCommandExceptionType INVALID_PREDICATE_EXCEPTION = new DynamicCommandExceptionType(id -> Component.translatable("blabber:commands.dialogue.start.predicate.invalid", String.valueOf(id)));
 
     private final ResourceLocation id;
     private final DialogueTemplate template;
@@ -112,7 +112,7 @@ public final class DialogueStateMachine {
         return this.template.layout();
     }
 
-    public Text getCurrentText() {
+    public Component getCurrentText() {
         return this.getCurrentState().text();
     }
 
@@ -138,7 +138,7 @@ public final class DialogueStateMachine {
             List<DialogueChoice> availableChoices = getStates().get(conditionalState.getKey()).choices();
             for (Int2BooleanMap.Entry conditionalChoice : conditionalState.getValue().int2BooleanEntrySet()) {
                 ResourceLocation predicateId = availableChoices.get(conditionalChoice.getIntKey()).condition().orElseThrow().predicate();
-                LootCondition condition = context.getWorld().getServer().getLootManager().getElement(
+                LootItemCondition condition = context.getLevel().getServer().getLootData().getElement(
                         LootDataType.PREDICATES, predicateId
                 );
                 if (condition == null) throw INVALID_PREDICATE_EXCEPTION.create(predicateId);
@@ -156,12 +156,9 @@ public final class DialogueStateMachine {
         return new ChoiceAvailabilityPacket(this.conditionalChoices);
     }
 
-    private static boolean runTest(LootCondition condition, LootContext context) {
-        LootContext.Entry<LootCondition> lootEntry = LootContext.predicate(condition);
-        context.markActive(lootEntry);
-        boolean testResult = condition.test(context);
-        context.markInactive(lootEntry);
-        return testResult;
+    private static boolean runTest(LootItemCondition condition, LootContext context) {
+        LootContext.ContextBuilder builder = new LootContext.ContextBuilder(context);
+        return condition.test(builder.create(LootContext.EntityTarget.THIS));
     }
 
     public void applyAvailabilityUpdate(ChoiceAvailabilityPacket payload) {
@@ -240,8 +237,8 @@ public final class DialogueStateMachine {
         return newChoices.build();
     }
 
-    private static Optional<Text> defaultLockedMessage() {
-        return Optional.of(Text.translatable("blabber:dialogue.locked_choice"));
+    private static Optional<Component> defaultLockedMessage() {
+        return Optional.of(Component.translatable("blabber:dialogue.locked_choice"));
     }
 
     public String getCurrentStateKey() {
