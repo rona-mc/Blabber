@@ -28,6 +28,11 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
@@ -48,7 +53,8 @@ import org.ladysnake.blabber.impl.common.illustrations.entity.DialogueIllustrati
 import org.ladysnake.blabber.impl.common.illustrations.entity.DialogueIllustrationSelectorEntity;
 import org.ladysnake.blabber.impl.common.machine.DialogueStateMachine;
 
-public final class Blabber implements ModInitializer { // TODO
+@Mod(Blabber.MOD_ID)
+public class Blabber {
 	public static final String MOD_ID = "blabber";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
@@ -167,8 +173,13 @@ public final class Blabber implements ModInitializer { // TODO
 		Registry.register(BlabberRegistrar.LAYOUT_REGISTRY, layoutId, type);
 	}
 
-	@Override
-	public void onInitialize() {
+	public Blabber() {
+		IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+		modEventBus.addListener(this::commonSetup);
+		MinecraftForge.EVENT_BUS.register(this);
+	}
+
+	private void commonSetup(final FMLCommonSetupEvent event) {
 		BlabberRegistrar.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> BlabberCommand.register(dispatcher)); // TODO
 		registerAction(id("command"), CommandDialogueAction.CODEC);
