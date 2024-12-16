@@ -51,7 +51,7 @@ public class ChoiceAvailabilityPacket {
     public void write(FriendlyByteBuf buf) {
         buf.writeMap(
                 this.updatedChoices,
-                FriendlyByteBuf::writeString,
+                FriendlyByteBuf::writeUtf,
                 (b, updatedChoices) -> b.writeMap(updatedChoices, FriendlyByteBuf::writeVarInt, FriendlyByteBuf::writeBoolean)
         );
     }
