@@ -31,7 +31,7 @@ import net.minecraft.loot.context.LootContextParameter;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.predicate.entity.EntityPredicate;
 import net.minecraft.util.JsonSerializer;
-import net.minecraft.util.dynamic.Codecs;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.Optional;

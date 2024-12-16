@@ -21,11 +21,11 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.client.render.entity.PlayerModelPart;
+import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.player.PlayerModelPart;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.util.Arm;
-import net.minecraft.util.dynamic.Codecs;
 import org.ladysnake.blabber.api.illustration.DialogueIllustrationType;
 import org.ladysnake.blabber.impl.common.model.IllustrationAnchor;
 import org.ladysnake.blabber.impl.common.serialization.FailingOptionalFieldCodec;
@@ -48,7 +48,7 @@ public record DialogueIllustrationFakePlayer(GameProfile profile,
                                              Optional<PlayerModelOptions> modelOptions,
                                              Optional<CompoundTag> data) implements DialogueIllustrationEntity {
     private static final Codec<DialogueIllustrationFakePlayer> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codecs.GAME_PROFILE.fieldOf("profile").forGetter(DialogueIllustrationFakePlayer::profile),
+            ExtraCodecs.GAME_PROFILE.fieldOf("profile").forGetter(DialogueIllustrationFakePlayer::profile),
             FailingOptionalFieldCodec.of(IllustrationAnchor.CODEC, "anchor", IllustrationAnchor.TOP_LEFT).forGetter(DialogueIllustrationFakePlayer::anchor),
             Codec.INT.fieldOf("x").forGetter(DialogueIllustrationFakePlayer::x),
             Codec.INT.fieldOf("y").forGetter(DialogueIllustrationFakePlayer::y),
@@ -65,7 +65,7 @@ public record DialogueIllustrationFakePlayer(GameProfile profile,
             CODEC,
             buf -> new DialogueIllustrationFakePlayer(
                     buf.readGameProfile(),
-                    buf.readEnumConstant(IllustrationAnchor.class),
+                    buf.readEnum(IllustrationAnchor.class),
                     buf.readVarInt(),
                     buf.readVarInt(),
                     buf.readVarInt(),
@@ -78,7 +78,7 @@ public record DialogueIllustrationFakePlayer(GameProfile profile,
             ),
             (buf, i) -> {
                 buf.writeGameProfile(i.profile());
-                buf.writeEnumConstant(i.anchor());
+                buf.writeEnum(i.anchor());
                 buf.writeVarInt(i.x());
                 buf.writeVarInt(i.y());
                 buf.writeVarInt(i.width());
@@ -100,8 +100,8 @@ public record DialogueIllustrationFakePlayer(GameProfile profile,
         return this.modelOptions().orElse(PlayerModelOptions.DEFAULT);
     }
 
-    public record PlayerModelOptions(Arm mainHand, EnumSet<PlayerModelPart> visibleParts) {
-        public static final PlayerModelOptions DEFAULT = new PlayerModelOptions(Arm.RIGHT, EnumSet.allOf(PlayerModelPart.class));
+    public record PlayerModelOptions(HumanoidArm mainHand, EnumSet<PlayerModelPart> visibleParts) {
+        public static final PlayerModelOptions DEFAULT = new PlayerModelOptions(HumanoidArm.RIGHT, EnumSet.allOf(PlayerModelPart.class));
         private static final Map<String, PlayerModelPart> partsByName;
 
         static {
@@ -129,30 +129,30 @@ public record DialogueIllustrationFakePlayer(GameProfile profile,
 
         public static final Codec<PlayerModelOptions> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 FailingOptionalFieldCodec.of(Codec.STRING.xmap(s -> switch (s) {
-                    case "left" -> Arm.LEFT;
-                    case "right" -> Arm.RIGHT;
-                    default -> throw new IllegalArgumentException(s + " is not a valid arm");
-                }, arm -> switch (arm) {
+                    case "left" -> HumanoidArm.LEFT;
+                    case "right" -> HumanoidArm.RIGHT;
+                    default -> throw new IllegalArgumentException(s + " is not a valid HumanoidArm");
+                }, HumanoidArm -> switch (HumanoidArm) {
                     case LEFT -> "left";
                     case RIGHT -> "right";
-                    default -> throw new IllegalStateException("Unexpected third arm " + arm);
-                }), "main_hand", Arm.RIGHT).forGetter(PlayerModelOptions::mainHand),
+                    default -> throw new IllegalStateException("Unexpected third HumanoidArm " + HumanoidArm);
+                }), "main_hand", HumanoidArm.RIGHT).forGetter(PlayerModelOptions::mainHand),
                 FailingOptionalFieldCodec.of(PLAYER_MODEL_PARTS_CODEC, "visible_parts", DEFAULT_VISIBLE_PARTS).forGetter(PlayerModelOptions::visibleParts)
         ).apply(instance, PlayerModelOptions::new));
 
         public PlayerModelOptions(FriendlyByteBuf buf) {
-            this(buf.readEnumConstant(Arm.class), buf.readEnumSet(PlayerModelPart.class));
+            this(buf.readEnum(HumanoidArm.class), buf.readEnumSet(PlayerModelPart.class));
         }
 
         public void writeToBuffer(FriendlyByteBuf buf) {
-            buf.writeEnumConstant(this.mainHand);
+            buf.writeEnum(this.mainHand);
             buf.writeEnumSet(this.visibleParts, PlayerModelPart.class);
         }
 
         public byte packVisibleParts() {
             byte packed = 0;
             for (PlayerModelPart playerModelPart : this.visibleParts()) {
-                packed |= (byte) playerModelPart.getBitFlag();
+                packed |= (byte) playerModelPart.getBit();
             }
             return packed;
         }
