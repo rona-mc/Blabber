@@ -92,12 +92,12 @@ public class DialogueScreenHandler extends AbstractContainerMenu {
     }
 
     @Override
-    public ItemStack quickMove(Player player, int index) {
+    public ItemStack quickMoveStack(Player player, int index) {
         return ItemStack.EMPTY;
     }
 
     @Override
-    public boolean canUse(Player player) {
+    public boolean stillValid(Player player) {
         return true;
     }
 
