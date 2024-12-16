@@ -17,9 +17,9 @@
  */
 package org.ladysnake.blabber.impl.common.model;
 
-import net.minecraft.util.StringIdentifiable;
+import net.minecraft.util.StringRepresentable;
 
-public enum IllustrationAnchor implements StringIdentifiable {
+public enum IllustrationAnchor implements StringRepresentable {
     /**
      * Starting at top-left, increasing towards bottom-right
      */
@@ -47,7 +47,7 @@ public enum IllustrationAnchor implements StringIdentifiable {
     SPOT_1("spot_1"),
     SPOT_2("spot_2");
 
-    public static final com.mojang.serialization.Codec<IllustrationAnchor> CODEC = StringIdentifiable.createCodec(IllustrationAnchor::values);
+    public static final com.mojang.serialization.Codec<IllustrationAnchor> CODEC = StringRepresentable.fromEnum(IllustrationAnchor::values);
 
     private final String id;
 
@@ -56,7 +56,7 @@ public enum IllustrationAnchor implements StringIdentifiable {
     }
 
     @Override
-    public String asString() {
+    public String getSerializedName() {
         return this.id;
     }
 }
