@@ -19,6 +19,7 @@ package org.ladysnake.blabber;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraft.world.entity.Entity;
@@ -60,7 +61,7 @@ public final class Blabber {
     /**
      * Starts a dialogue
      *
-     * <p>This operation closes the player's {@linkplain  Player#currentScreenHandler current screen handler},
+     * <p>This operation closes the player's {@linkplain  Player#containerMenu current screen handler},
      * if any, and opens a new dialogue screen instead.
      *
      * <p>A dialogue may fail to start if it contains malformed texts as per {@link net.minecraft.network.chat.Component#parse(CommandSourceStack, Component, Entity, int)}.
@@ -78,7 +79,7 @@ public final class Blabber {
     /**
      * Starts a dialogue
      *
-     * <p>This operation closes the player's {@linkplain  Player#currentScreenHandler current screen handler},
+     * <p>This operation closes the player's {@linkplain  Player#containerMenu current screen handler},
      * if any, and opens a new dialogue screen instead.
      *
      * <p>A dialogue may fail to start if it contains malformed texts as per {@link net.minecraft.network.chat.Component#parse(CommandSourceStack, Component, Entity, int)}.
