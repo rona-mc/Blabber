@@ -18,7 +18,7 @@
 package org.ladysnake.blabber.impl.mixin;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.EntitySelector;
+import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.commands.CommandSourceStack;
 import org.ladysnake.blabber.impl.common.BlabberEntitySelectorExt;
@@ -36,10 +36,13 @@ public abstract class EntitySelectorMixin implements BlabberEntitySelectorExt {
     @Unique
     private boolean blabber$interlocutorSelector;
 
-    @Inject(method = "getUnfilteredEntities", at = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelector;senderOnly:Z"), cancellable = true)
+    @Inject(method = "findEntities", at = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/EntitySelector;includeNonPlayers:Z"), cancellable = true)
     private void replaceSelf(CommandSourceStack source, CallbackInfoReturnable<List<? extends Entity>> cir) throws CommandSyntaxException {
         if (this.blabber$interlocutorSelector) {
-            cir.setReturnValue(source.getPlayerOrThrow().getComponent(PlayerDialogueTracker.KEY).getInterlocutor().map(List::of).orElse(List.of()));
+            cir.setReturnValue(PlayerDialogueTracker.get(source.getPlayerOrException())
+                .getInterlocutor()
+                .map(List::of)
+                .orElse(List.of()));
         }
     }
 
