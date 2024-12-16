@@ -17,15 +17,15 @@
  */
 package org.ladysnake.blabber;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import org.ladysnake.blabber.api.DialogueActionV2;
 
 /**
  * @see DialogueActionV2
- * @see Blabber#registerAction(Identifier, DialogueAction)
+ * @see Blabber#registerAction(ResourceLocation, DialogueAction)
  */
 @FunctionalInterface
 public interface DialogueAction extends DialogueActionV2 {
@@ -34,10 +34,10 @@ public interface DialogueAction extends DialogueActionV2 {
      *
      * @param player the player executing the action
      */
-    void handle(ServerPlayerEntity player);
+    void handle(ServerPlayer player);
 
     @Override
-    default void handle(ServerPlayerEntity player, @Nullable Entity interlocutor) {
+    default void handle(ServerPlayer player, @Nullable Entity interlocutor) {
         this.handle(player);
     }
 }
