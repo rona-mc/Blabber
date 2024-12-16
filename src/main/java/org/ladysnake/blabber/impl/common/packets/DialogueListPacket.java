@@ -17,29 +17,38 @@
  */
 package org.ladysnake.blabber.impl.common.packets;
 
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import org.ladysnake.blabber.Blabber;
+import net.minecraftforge.network.NetworkEvent;
+import org.ladysnake.blabber.impl.common.DialogueRegistry;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Supplier;
 
-public record DialogueListPacket(Set<ResourceLocation> dialogueIds) implements FabricPacket {
-    public static final PacketType<DialogueListPacket> TYPE = PacketType.create(Blabber.id("dialogue_list"), DialogueListPacket::new);
+public class DialogueListPacket {
+    private final Set<ResourceLocation> dialogueIds;
+
+    public DialogueListPacket(Set<ResourceLocation> dialogueIds) {
+        this.dialogueIds = dialogueIds;
+    }
 
     public DialogueListPacket(FriendlyByteBuf buf) {
         this(buf.<ResourceLocation, Set<ResourceLocation>>readCollection(HashSet::new, FriendlyByteBuf::readResourceLocation));
     }
 
-    @Override
     public void write(FriendlyByteBuf buf) {
-        buf.writeCollection(dialogueIds(), FriendlyByteBuf::writeResourceLocation);
+        buf.writeCollection(dialogueIds, FriendlyByteBuf::writeResourceLocation);
     }
 
-    @Override
-    public PacketType<?> getType() {
-        return TYPE;
+    public void handle(Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> {
+            DialogueRegistry.setClientIds(dialogueIds);
+        });
+        ctx.get().setPacketHandled(true);
+    }
+
+    public Set<ResourceLocation> getDialogueIds() {
+        return dialogueIds;
     }
 }
