@@ -19,10 +19,11 @@ package org.ladysnake.blabber.impl.common;
 
 import com.google.common.base.Preconditions;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.nbt.CompoundTag;
@@ -212,7 +213,7 @@ public final class PlayerDialogueTracker {
                     new LootParams.Builder(player.serverLevel())
                             .withParameter(LootContextParams.ORIGIN, player.position())
                             .withOptionalParameter(LootContextParams.THIS_ENTITY, player)
-                            .create(LootParams.UNKNOWN)
+                            .create(LootContextParamSets.COMMAND)
             ).create(null));
         }
         return null;
@@ -220,7 +221,7 @@ public final class PlayerDialogueTracker {
 
     private void openDialogueScreen() {
         Preconditions.checkState(this.currentDialogue != null);
-        this.player.openMenu(new DialogueScreenHandlerFactory(this.currentDialogue, Component.literal("Blabber Dialogue Screen"), this.interlocutor));
+        this.player.openMenu((MenuProvider) new DialogueScreenHandlerFactory(this.currentDialogue, Component.literal("Blabber Dialogue Screen"), this.interlocutor));
     }
 
     public void copyFrom(PlayerDialogueTracker old) {
