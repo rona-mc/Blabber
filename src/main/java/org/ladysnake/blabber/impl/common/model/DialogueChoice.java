@@ -44,13 +44,13 @@ public record DialogueChoice(Component text, List<String> illustrations, String 
 
     public static void writeToPacket(FriendlyByteBuf buf, DialogueChoice choice) {
         buf.writeComponent(choice.text());
-        buf.writeCollection(choice.illustrations(), FriendlyByteBuf::writeString);
-        buf.writeString(choice.next());
+        buf.writeCollection(choice.illustrations(), FriendlyByteBuf::writeUtf);
+        buf.writeUtf(choice.next());
         buf.writeOptional(choice.condition(), DialogueChoiceCondition::writeToPacket);
     }
 
     public DialogueChoice(FriendlyByteBuf buf) {
-        this(buf.readComponent(), buf.readCollection(ArrayList::new, FriendlyByteBuf::readString), buf.readString(), buf.readOptional(DialogueChoiceCondition::new));
+        this(buf.readComponent(), buf.readCollection(ArrayList::new, FriendlyByteBuf::readUtf), buf.readUtf(), buf.readOptional(DialogueChoiceCondition::new));
     }
 
     public DialogueChoice parseText(@Nullable CommandSourceStack source, @Nullable Entity sender) throws CommandSyntaxException {

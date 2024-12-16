@@ -89,11 +89,11 @@ public final class DialogueStateMachine {
     public static void writeToPacket(FriendlyByteBuf buf, DialogueStateMachine dialogue) {
         buf.writeResourceLocation(dialogue.getId());
         DialogueTemplate.writeToPacket(buf, dialogue.template);
-        buf.writeString(dialogue.getCurrentStateKey());
+        buf.writeUtf(dialogue.getCurrentStateKey());
     }
 
     public DialogueStateMachine(FriendlyByteBuf buf) {
-        this(buf.readResourceLocation(), new DialogueTemplate(buf), buf.readString());
+        this(buf.readResourceLocation(), new DialogueTemplate(buf), buf.readUtf());
     }
 
     private Map<String, DialogueState> getStates() {
@@ -139,7 +139,7 @@ public final class DialogueStateMachine {
             for (Int2BooleanMap.Entry conditionalChoice : conditionalState.getValue().int2BooleanEntrySet()) {
                 ResourceLocation predicateId = availableChoices.get(conditionalChoice.getIntKey()).condition().orElseThrow().predicate();
                 LootItemCondition condition = context.getLevel().getServer().getLootData().getElement(
-                        LootDataType.PREDICATES, predicateId
+                        LootDataType.PREDICATE, predicateId
                 );
                 if (condition == null) throw INVALID_PREDICATE_EXCEPTION.create(predicateId);
                 boolean testResult = runTest(condition, context);
@@ -157,8 +157,11 @@ public final class DialogueStateMachine {
     }
 
     private static boolean runTest(LootItemCondition condition, LootContext context) {
-        LootContext.ContextBuilder builder = new LootContext.ContextBuilder(context);
-        return condition.test(builder.create(LootContext.EntityTarget.THIS));
+        LootContext.VisitedEntry<LootItemCondition> lootEntry = LootContext.createVisitedEntry(condition);
+        context.pushVisitedElement(lootEntry);
+        boolean testResult = condition.test(context);
+        context.popVisitedElement(lootEntry);
+        return testResult;
     }
 
     public void applyAvailabilityUpdate(ChoiceAvailabilityPacket payload) {

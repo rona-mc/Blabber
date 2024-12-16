@@ -54,14 +54,14 @@ public record DialogueState(
 
     public static void writeToPacket(FriendlyByteBuf buf, DialogueState state) {
         buf.writeComponent(state.text());
-        buf.writeCollection(state.illustrations(), FriendlyByteBuf::writeString);
+        buf.writeCollection(state.illustrations(), FriendlyByteBuf::writeUtf);
         buf.writeCollection(state.choices(), DialogueChoice::writeToPacket);
         buf.writeEnum(state.type());
         // not writing the action, the client most likely does not need to know about it
     }
 
     public DialogueState(FriendlyByteBuf buf) {
-        this(buf.readComponent(), buf.readCollection(ArrayList::new, FriendlyByteBuf::readString), buf.readList(DialogueChoice::new), Optional.empty(), buf.readEnum(ChoiceResult.class));
+        this(buf.readComponent(), buf.readCollection(ArrayList::new, FriendlyByteBuf::readUtf), buf.readList(DialogueChoice::new), Optional.empty(), buf.readEnum(ChoiceResult.class));
     }
 
     public String getNextState(int choice) {
