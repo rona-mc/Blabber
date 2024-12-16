@@ -23,6 +23,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public record AvailableChoice(int originalChoiceIndex, Text text, List<String> illustrations, Optional<Text> unavailabilityMessage) {
-    public static final AvailableChoice ESCAPE_HATCH = new AvailableChoice(-1, Text.translatable("blabber:dialogue.escape_hatch"), Collections.emptyList(), Optional.empty());
+public record AvailableChoice(int originalChoiceIndex, Component text, List<String> illustrations, Optional<Component> unavailabilityMessage) {
+    public static final AvailableChoice ESCAPE_HATCH = new AvailableChoice(-1, Component.translatable("blabber:dialogue.escape_hatch"), Collections.emptyList(), Optional.empty());
 }
