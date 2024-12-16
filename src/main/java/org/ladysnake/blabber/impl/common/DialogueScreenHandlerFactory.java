@@ -17,21 +17,16 @@
  */
 package org.ladysnake.blabber.impl.common;
 
-//import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import org.ladysnake.blabber.impl.common.machine.DialogueStateMachine;
 
-import java.util.Optional;
-
-// TODO
-public class DialogueScreenHandlerFactory implements ExtendedScreenHandlerFactory {
+public class DialogueScreenHandlerFactory implements MenuProvider {
     private final DialogueStateMachine dialogue;
     private final Component displayName;
     private final @Nullable Entity interlocutor;
@@ -40,13 +35,6 @@ public class DialogueScreenHandlerFactory implements ExtendedScreenHandlerFactor
         this.dialogue = dialogue;
         this.displayName = displayName;
         this.interlocutor = interlocutor;
-    }
-
-    @Override
-    public void writeScreenOpeningData(ServerPlayer player, FriendlyByteBuf buf) {
-        DialogueStateMachine.writeToPacket(buf, this.dialogue);
-        buf.writeOptional(Optional.ofNullable(interlocutor), (b, e) -> b.writeVarInt(e.getId()));
-        this.dialogue.createFullAvailabilityUpdatePacket().write(buf);
     }
 
     @Override
