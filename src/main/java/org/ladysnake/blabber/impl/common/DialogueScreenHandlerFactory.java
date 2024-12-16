@@ -27,6 +27,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraftforge.network.IContainerFactory;
 import org.jetbrains.annotations.Nullable;
 import org.ladysnake.blabber.impl.common.machine.DialogueStateMachine;
+import org.ladysnake.blabber.impl.common.packets.ChoiceAvailabilityPacket;
 
 import java.util.Optional;
 

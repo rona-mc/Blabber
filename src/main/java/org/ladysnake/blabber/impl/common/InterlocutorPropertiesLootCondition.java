@@ -39,7 +39,7 @@ import java.util.Set;
 
 public record InterlocutorPropertiesLootCondition(EntityPredicate predicate) implements LootItemCondition {
     public static final Codec<InterlocutorPropertiesLootCondition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        ExtraCodecs.JSON_ELEMENT.xmap(EntityPredicate::fromJson, EntityPredicate::toJson)
+        ExtraCodecs.JSON.xmap(EntityPredicate::fromJson, EntityPredicate::serializeToJson)
                            .fieldOf("predicate")
                            .forGetter(InterlocutorPropertiesLootCondition::predicate)
     ).apply(instance, InterlocutorPropertiesLootCondition::new));

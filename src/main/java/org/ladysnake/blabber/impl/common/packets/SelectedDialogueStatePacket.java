@@ -41,7 +41,7 @@ public class SelectedDialogueStatePacket {
     public void handle(Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             if (ctx.get().getSender() != null && ctx.get().getSender().containerMenu instanceof DialogueScreenHandler dialogueHandler) {
-                dialogueHandler.selectState(stateKey);
+                dialogueHandler.setCurrentState(stateKey);
             }
         });
         ctx.get().setPacketHandled(true);
