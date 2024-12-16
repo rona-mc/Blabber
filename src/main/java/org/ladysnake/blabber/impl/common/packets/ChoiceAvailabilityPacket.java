@@ -19,9 +19,9 @@ package org.ladysnake.blabber.impl.common.packets;
 
 import it.unimi.dsi.fastutil.ints.Int2BooleanMap;
 import it.unimi.dsi.fastutil.ints.Int2BooleanOpenHashMap;
-//import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-//import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.FriendlyByteBuf;
+import net.sjhub.blabber.network.ForgePacket;
+import net.sjhub.blabber.network.PacketType;
 import org.ladysnake.blabber.Blabber;
 
 import java.util.HashMap;
@@ -30,7 +30,7 @@ import java.util.Map;
 /**
  * Represents a list of dialogue choices which availability has changed
  */
-public record ChoiceAvailabilityPacket(Map<String, Int2BooleanMap> updatedChoices) implements FabricPacket { // TODO
+public record ChoiceAvailabilityPacket(Map<String, Int2BooleanMap> updatedChoices) implements ForgePacket { // TODO
     public static final PacketType<ChoiceAvailabilityPacket> TYPE = PacketType.create(Blabber.id("choice_availability"), ChoiceAvailabilityPacket::new); // TODO
 
     public ChoiceAvailabilityPacket() {
