@@ -20,11 +20,11 @@ package org.ladysnake.blabber.impl.common.model;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.entity.Entity;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
-import net.minecraft.text.Texts;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Components;
 import net.minecraft.util.dynamic.Codecs;
 import org.jetbrains.annotations.Nullable;
 import org.ladysnake.blabber.impl.common.serialization.FailingOptionalFieldCodec;
@@ -37,16 +37,16 @@ public record UnavailableAction(UnavailableDisplay display, Optional<Text> messa
             FailingOptionalFieldCodec.of(Codecs.TEXT, "message").forGetter(UnavailableAction::message)
     ).apply(instance, UnavailableAction::new));
 
-    public UnavailableAction(PacketByteBuf buf) {
-        this(buf.readEnumConstant(UnavailableDisplay.class), buf.readOptional(PacketByteBuf::readText));
+    public UnavailableAction(FriendlyByteBuf buf) {
+        this(buf.readEnumConstant(UnavailableDisplay.class), buf.readOptional(FriendlyByteBuf::readText));
     }
 
-    public static void writeToPacket(PacketByteBuf buf, UnavailableAction action) {
+    public static void writeToPacket(FriendlyByteBuf buf, UnavailableAction action) {
         buf.writeEnumConstant(action.display());
-        buf.writeOptional(action.message(), PacketByteBuf::writeText);
+        buf.writeOptional(action.message(), FriendlyByteBuf::writeText);
     }
 
-    public UnavailableAction parseText(@Nullable ServerCommandSource source, @Nullable Entity sender) throws CommandSyntaxException {
+    public UnavailableAction parseText(@Nullable CommandSourceStack source, @Nullable Entity sender) throws CommandSyntaxException {
         Optional<Text> parsedMessage = message().isEmpty() ? Optional.empty() : Optional.of(Texts.parse(source, message().get(), sender, 0));
         return new UnavailableAction(display(), parsedMessage);
     }

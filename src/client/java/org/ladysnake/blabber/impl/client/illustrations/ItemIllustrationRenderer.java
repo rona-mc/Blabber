@@ -19,7 +19,7 @@ package org.ladysnake.blabber.impl.client.illustrations;
 
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import org.ladysnake.blabber.api.client.illustration.DialogueIllustrationRenderer;
 import org.ladysnake.blabber.impl.common.illustrations.DialogueIllustrationItem;
 import org.ladysnake.blabber.impl.common.illustrations.PositionTransform;

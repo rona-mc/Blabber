@@ -21,7 +21,7 @@ import it.unimi.dsi.fastutil.ints.Int2BooleanMap;
 import it.unimi.dsi.fastutil.ints.Int2BooleanOpenHashMap;
 import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import org.ladysnake.blabber.Blabber;
 
 import java.util.HashMap;
@@ -37,19 +37,19 @@ public record ChoiceAvailabilityPacket(Map<String, Int2BooleanMap> updatedChoice
         this(new HashMap<>());
     }
 
-    public ChoiceAvailabilityPacket(PacketByteBuf buf) {
+    public ChoiceAvailabilityPacket(FriendlyByteBuf buf) {
         this(buf.readMap(
-                PacketByteBuf::readString,
-                b -> b.readMap(Int2BooleanOpenHashMap::new, PacketByteBuf::readVarInt, PacketByteBuf::readBoolean)
+                FriendlyByteBuf::readString,
+                b -> b.readMap(Int2BooleanOpenHashMap::new, FriendlyByteBuf::readVarInt, FriendlyByteBuf::readBoolean)
         ));
     }
 
     @Override
-    public void write(PacketByteBuf buf) {
+    public void write(FriendlyByteBuf buf) {
         buf.writeMap(
                 this.updatedChoices(),
-                PacketByteBuf::writeString,
-                (b, updatedChoices) -> b.writeMap(updatedChoices, PacketByteBuf::writeVarInt, PacketByteBuf::writeBoolean)
+                FriendlyByteBuf::writeString,
+                (b, updatedChoices) -> b.writeMap(updatedChoices, FriendlyByteBuf::writeVarInt, FriendlyByteBuf::writeBoolean)
         );
     }
 

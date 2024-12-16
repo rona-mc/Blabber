@@ -24,10 +24,10 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.EntitySelector;
 import net.minecraft.command.EntitySelectorReader;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import org.ladysnake.blabber.api.illustration.DialogueIllustrationType;
@@ -124,7 +124,7 @@ public class DialogueIllustrationSelectorEntity implements DialogueIllustrationE
     }
 
     @Override
-    public DialogueIllustrationSelectorEntity parseText(@Nullable ServerCommandSource source, @Nullable Entity sender) throws CommandSyntaxException {
+    public DialogueIllustrationSelectorEntity parseText(@Nullable CommandSourceStack source, @Nullable Entity sender) throws CommandSyntaxException {
         if (source != null) {
             EntitySelector entitySelector = new EntitySelectorReader(new StringReader(spec().selector())).read();
             Entity e = entitySelector.getEntity(source);
@@ -169,7 +169,7 @@ public class DialogueIllustrationSelectorEntity implements DialogueIllustrationE
         ).apply(instance, Spec::new));
         public static final MapCodec<Spec> CODEC = EitherMapCodec.alternatively(CODEC_V0, CODEC_V1);
 
-        public Spec(PacketByteBuf buf) {
+        public Spec(FriendlyByteBuf buf) {
             this(
                     buf.readString(),
                     buf.readEnumConstant(IllustrationAnchor.class),
@@ -183,7 +183,7 @@ public class DialogueIllustrationSelectorEntity implements DialogueIllustrationE
             );
         }
 
-        public void writeToBuffer(PacketByteBuf buf) {
+        public void writeToBuffer(FriendlyByteBuf buf) {
             buf.writeString(selector());
             buf.writeEnumConstant(anchor());
             buf.writeInt(x());

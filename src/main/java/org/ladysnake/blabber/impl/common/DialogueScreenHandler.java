@@ -20,13 +20,13 @@ package org.ladysnake.blabber.impl.common;
 import com.demonwav.mcdev.annotations.CheckEnv;
 import com.demonwav.mcdev.annotations.Env;
 import com.google.common.collect.ImmutableList;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import org.ladysnake.blabber.Blabber;
 import org.ladysnake.blabber.api.illustration.DialogueIllustration;
@@ -110,7 +110,7 @@ public class DialogueScreenHandler extends ScreenHandler {
         return this.dialogue.choose(choice, action -> {});
     }
 
-    public boolean makeChoice(ServerPlayerEntity player, int choice) {
+    public boolean makeChoice(ServerPlayer player, int choice) {
         try {  // Can't throw here, could cause trouble with a bad packet
             ChoiceResult result = this.dialogue.choose(choice, action -> action.handle(player, this.interlocutor));
             // The action itself can close the dialogue or switch to a different one, so we need to check this one is still open

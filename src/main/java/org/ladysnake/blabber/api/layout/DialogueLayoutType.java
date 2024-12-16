@@ -19,7 +19,7 @@ package org.ladysnake.blabber.api.layout;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.ApiStatus;
 import org.ladysnake.blabber.impl.common.BlabberRegistrar;
 import org.ladysnake.blabber.impl.common.serialization.FailingOptionalFieldCodec;
@@ -34,10 +34,10 @@ public class DialogueLayoutType<P extends DialogueLayout.Params> {
     );
 
     private final Codec<DialogueLayout<P>> codec;
-    private final Function<PacketByteBuf, P> read;
-    private final BiConsumer<PacketByteBuf, P> write;
+    private final Function<FriendlyByteBuf, P> read;
+    private final BiConsumer<FriendlyByteBuf, P> write;
 
-    public DialogueLayoutType(Codec<P> paramsCodec, P defaultParams, Function<PacketByteBuf, P> read, BiConsumer<PacketByteBuf, P> write) {
+    public DialogueLayoutType(Codec<P> paramsCodec, P defaultParams, Function<FriendlyByteBuf, P> read, BiConsumer<FriendlyByteBuf, P> write) {
         this.codec = RecordCodecBuilder.create(instance -> instance.group(
                 FailingOptionalFieldCodec.of(paramsCodec, "params", defaultParams).forGetter(DialogueLayout::params)
         ).apply(instance, p -> new DialogueLayout<>(this, p)));
@@ -58,7 +58,7 @@ public class DialogueLayoutType<P extends DialogueLayout.Params> {
      * @return a newly parsed DialogueIllustration corresponding to this type
      */
     @ApiStatus.Experimental
-    public static <P extends DialogueLayout.Params> DialogueLayout<P> readFromPacket(PacketByteBuf buf) {
+    public static <P extends DialogueLayout.Params> DialogueLayout<P> readFromPacket(FriendlyByteBuf buf) {
         @SuppressWarnings("unchecked") DialogueLayoutType<P> type = (DialogueLayoutType<P>) buf.readRegistryValue(BlabberRegistrar.LAYOUT_REGISTRY);
         assert type != null;
         return new DialogueLayout<>(type, type.read.apply(buf));
@@ -70,7 +70,7 @@ public class DialogueLayoutType<P extends DialogueLayout.Params> {
      * @param toWrite the illustration to write
      */
     @ApiStatus.Experimental
-    public static <P extends DialogueLayout.Params> void writeToPacket(PacketByteBuf buf, DialogueLayout<P> toWrite) {
+    public static <P extends DialogueLayout.Params> void writeToPacket(FriendlyByteBuf buf, DialogueLayout<P> toWrite) {
         buf.writeRegistryValue(BlabberRegistrar.LAYOUT_REGISTRY, toWrite.type());
         toWrite.type().write.accept(buf, toWrite.params());
     }

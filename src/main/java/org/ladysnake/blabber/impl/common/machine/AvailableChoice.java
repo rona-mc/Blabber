@@ -17,7 +17,7 @@
  */
 package org.ladysnake.blabber.impl.common.machine;
 
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 import java.util.Collections;
 import java.util.List;

@@ -19,7 +19,7 @@ package org.ladysnake.blabber.impl.common.illustrations;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.ladysnake.blabber.api.illustration.DialogueIllustration;
 import org.ladysnake.blabber.api.illustration.DialogueIllustrationType;
 import org.ladysnake.blabber.impl.common.model.IllustrationAnchor;
@@ -29,7 +29,7 @@ import org.ladysnake.blabber.impl.common.serialization.OptionalSerialization;
 import java.util.OptionalInt;
 
 public record DialogueIllustrationTexture(
-        Identifier texture,
+        ResourceLocation texture,
         IllustrationAnchor anchor,
         int x,
         int y,
@@ -43,7 +43,7 @@ public record DialogueIllustrationTexture(
         OptionalInt regionHeight
 ) implements SizedDialogueIllustration {
     public static final Codec<DialogueIllustrationTexture> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Identifier.CODEC.fieldOf("texture").forGetter(DialogueIllustrationTexture::texture),
+            ResourceLocation.CODEC.fieldOf("texture").forGetter(DialogueIllustrationTexture::texture),
             FailingOptionalFieldCodec.of(IllustrationAnchor.CODEC, "anchor", IllustrationAnchor.TOP_LEFT).forGetter(DialogueIllustrationTexture::anchor),
             Codec.INT.fieldOf("x").forGetter(DialogueIllustrationTexture::x),
             Codec.INT.fieldOf("y").forGetter(DialogueIllustrationTexture::y),
@@ -59,7 +59,7 @@ public record DialogueIllustrationTexture(
 
     public static final DialogueIllustrationType<DialogueIllustrationTexture> TYPE = new DialogueIllustrationType<>(CODEC,
             buf -> new DialogueIllustrationTexture(
-                    buf.readIdentifier(),
+                    buf.readResourceLocation(),
                     buf.readEnumConstant(IllustrationAnchor.class),
                     buf.readVarInt(),
                     buf.readVarInt(),
@@ -73,7 +73,7 @@ public record DialogueIllustrationTexture(
                     OptionalSerialization.readOptionalInt(buf)
             ),
             (buf, image) -> {
-                buf.writeIdentifier(image.texture());
+                buf.writeResourceLocation(image.texture());
                 buf.writeEnumConstant(image.anchor());
                 buf.writeVarInt(image.x());
                 buf.writeVarInt(image.y());

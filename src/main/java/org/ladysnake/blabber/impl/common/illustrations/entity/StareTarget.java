@@ -19,7 +19,7 @@ package org.ladysnake.blabber.impl.common.illustrations.entity;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import org.ladysnake.blabber.impl.common.model.IllustrationAnchor;
 import org.ladysnake.blabber.impl.common.serialization.FailingOptionalFieldCodec;
 import org.ladysnake.blabber.impl.common.serialization.OptionalSerialization;
@@ -36,7 +36,7 @@ public record StareTarget(Optional<IllustrationAnchor> anchor, OptionalInt x,
     ).apply(instance, StareTarget::new));
     public static final StareTarget FOLLOW_MOUSE = new StareTarget(Optional.empty(), OptionalInt.empty(), OptionalInt.empty());
 
-    public StareTarget(PacketByteBuf buf) {
+    public StareTarget(FriendlyByteBuf buf) {
         this(
                 buf.readOptional(b -> b.readEnumConstant(IllustrationAnchor.class)),
                 OptionalSerialization.readOptionalInt(buf),
@@ -44,8 +44,8 @@ public record StareTarget(Optional<IllustrationAnchor> anchor, OptionalInt x,
         );
     }
 
-    public static void writeToPacket(PacketByteBuf buf, StareTarget stareTarget) {
-        buf.writeOptional(stareTarget.anchor(), PacketByteBuf::writeEnumConstant);
+    public static void writeToPacket(FriendlyByteBuf buf, StareTarget stareTarget) {
+        buf.writeOptional(stareTarget.anchor(), FriendlyByteBuf::writeEnumConstant);
         OptionalSerialization.writeOptionalInt(buf, stareTarget.x());
         OptionalSerialization.writeOptionalInt(buf, stareTarget.y());
     }

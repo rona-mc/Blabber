@@ -26,9 +26,9 @@ import it.unimi.dsi.fastutil.ints.Int2BooleanOpenHashMap;
 import net.minecraft.loot.LootDataType;
 import net.minecraft.loot.condition.LootCondition;
 import net.minecraft.loot.context.LootContext;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import org.ladysnake.blabber.Blabber;
 import org.ladysnake.blabber.api.DialogueActionV2;
@@ -55,13 +55,13 @@ import java.util.stream.IntStream;
 public final class DialogueStateMachine {
     private static final DynamicCommandExceptionType INVALID_PREDICATE_EXCEPTION = new DynamicCommandExceptionType(id -> Text.translatable("blabber:commands.dialogue.start.predicate.invalid", String.valueOf(id)));
 
-    private final Identifier id;
+    private final ResourceLocation id;
     private final DialogueTemplate template;
     private final Map<String, Int2BooleanMap> conditionalChoices;
     private @Nullable String currentStateKey;
     private ImmutableList<AvailableChoice> availableChoices = ImmutableList.of();
 
-    public DialogueStateMachine(Identifier id, DialogueTemplate template, @Nullable String start) {
+    public DialogueStateMachine(ResourceLocation id, DialogueTemplate template, @Nullable String start) {
         this.template = template;
         this.id = id;
         this.conditionalChoices = gatherConditionalChoices(template);
@@ -86,14 +86,14 @@ public final class DialogueStateMachine {
         return conditionalChoices;
     }
 
-    public static void writeToPacket(PacketByteBuf buf, DialogueStateMachine dialogue) {
-        buf.writeIdentifier(dialogue.getId());
+    public static void writeToPacket(FriendlyByteBuf buf, DialogueStateMachine dialogue) {
+        buf.writeResourceLocation(dialogue.getId());
         DialogueTemplate.writeToPacket(buf, dialogue.template);
         buf.writeString(dialogue.getCurrentStateKey());
     }
 
-    public DialogueStateMachine(PacketByteBuf buf) {
-        this(buf.readIdentifier(), new DialogueTemplate(buf), buf.readString());
+    public DialogueStateMachine(FriendlyByteBuf buf) {
+        this(buf.readResourceLocation(), new DialogueTemplate(buf), buf.readString());
     }
 
     private Map<String, DialogueState> getStates() {
@@ -104,7 +104,7 @@ public final class DialogueStateMachine {
         return getStates().get(this.getCurrentStateKey());
     }
 
-    public Identifier getId() {
+    public ResourceLocation getId() {
         return this.id;
     }
 
@@ -137,7 +137,7 @@ public final class DialogueStateMachine {
         for (Map.Entry<String, Int2BooleanMap> conditionalState : this.conditionalChoices.entrySet()) {
             List<DialogueChoice> availableChoices = getStates().get(conditionalState.getKey()).choices();
             for (Int2BooleanMap.Entry conditionalChoice : conditionalState.getValue().int2BooleanEntrySet()) {
-                Identifier predicateId = availableChoices.get(conditionalChoice.getIntKey()).condition().orElseThrow().predicate();
+                ResourceLocation predicateId = availableChoices.get(conditionalChoice.getIntKey()).condition().orElseThrow().predicate();
                 LootCondition condition = context.getWorld().getServer().getLootManager().getElement(
                         LootDataType.PREDICATES, predicateId
                 );

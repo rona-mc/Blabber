@@ -17,7 +17,7 @@
  */
 package org.ladysnake.blabber.impl.client.illustrations;
 
-import net.minecraft.entity.EntityType;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.registry.Registries;
 import net.minecraft.world.World;

@@ -22,7 +22,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.math.ColorHelper;
 import org.joml.Matrix4f;
 import org.ladysnake.blabber.api.client.BlabberDialogueScreen;

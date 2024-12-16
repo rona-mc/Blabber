@@ -19,8 +19,8 @@ package org.ladysnake.blabber.impl.common.illustrations;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 import org.ladysnake.blabber.api.illustration.DialogueIllustrationType;
 import org.ladysnake.blabber.impl.common.model.IllustrationAnchor;
 import org.ladysnake.blabber.impl.common.serialization.FailingOptionalFieldCodec;
@@ -38,10 +38,10 @@ public record DialogueIllustrationItem(ItemStack stack, IllustrationAnchor ancho
 
     public static final DialogueIllustrationType<DialogueIllustrationItem> TYPE = new DialogueIllustrationType<>(
             CODEC,
-            buf -> new DialogueIllustrationItem(ItemStack.fromNbt(buf.readNbt()), buf.readEnumConstant(IllustrationAnchor.class), buf.readInt(), buf.readInt(), buf.readFloat(), buf.readBoolean()),
+            buf -> new DialogueIllustrationItem(ItemStack.of(buf.readNbt()), buf.readEnum(IllustrationAnchor.class), buf.readInt(), buf.readInt(), buf.readFloat(), buf.readBoolean()),
             (buf, item) -> {
-                buf.writeNbt(item.stack().writeNbt(new NbtCompound()));
-                buf.writeEnumConstant(item.anchor());
+                buf.writeNbt(item.stack().save(new CompoundTag()));
+                buf.writeEnum(item.anchor());
                 buf.writeInt(item.x());
                 buf.writeInt(item.y());
                 buf.writeFloat(item.scale());

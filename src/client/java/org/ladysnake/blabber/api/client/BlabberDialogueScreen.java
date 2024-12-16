@@ -25,8 +25,8 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.option.GameOptions;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -53,8 +53,8 @@ import java.util.stream.IntStream;
 
 @ApiStatus.Experimental // half internal, expect some things to change
 public class BlabberDialogueScreen<P extends DialogueLayout.Params> extends HandledScreen<DialogueScreenHandler> {
-    public static final List<Identifier> DIALOGUE_ARROWS = IntStream.range(1, 6).mapToObj(i -> Blabber.id("textures/gui/sprites/container/dialogue/dialogue_arrow_" + i + ".png")).toList();
-    public static final List<Identifier> DIALOGUE_LOCKS = IntStream.range(1, 4).mapToObj(i -> Blabber.id("textures/gui/sprites/container/dialogue/dialogue_lock_" + i + ".png")).toList();
+    public static final List<ResourceLocation> DIALOGUE_ARROWS = IntStream.range(1, 6).mapToObj(i -> Blabber.id("textures/gui/sprites/container/dialogue/dialogue_arrow_" + i + ".png")).toList();
+    public static final List<ResourceLocation> DIALOGUE_LOCKS = IntStream.range(1, 4).mapToObj(i -> Blabber.id("textures/gui/sprites/container/dialogue/dialogue_lock_" + i + ".png")).toList();
     public static final int DEFAULT_TITLE_GAP = 20;
     public static final int DEFAULT_TEXT_MAX_WIDTH = 300;
     public static final int DEFAULT_INSTRUCTIONS_BOTTOM_MARGIN = 30;
@@ -72,8 +72,8 @@ public class BlabberDialogueScreen<P extends DialogueLayout.Params> extends Hand
     protected final Text instructions;
 
     // Things that could be constants but may be mutated by subclasses
-    protected Identifier selectionIconTexture = DIALOGUE_ARROWS.get(0);
-    protected Identifier lockIconTexture = DIALOGUE_LOCKS.get(0);
+    protected ResourceLocation selectionIconTexture = DIALOGUE_ARROWS.get(0);
+    protected ResourceLocation lockIconTexture = DIALOGUE_LOCKS.get(0);
     /**
      * Margin from the top of the screen to the dialogue's main text
      */

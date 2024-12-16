@@ -21,8 +21,8 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.text.Text;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import org.ladysnake.blabber.Blabber;
 import org.ladysnake.blabber.api.client.BlabberDialogueScreen;
 import org.ladysnake.blabber.api.client.BlabberScreenRegistry;
@@ -121,7 +121,7 @@ public final class BlabberClient implements ClientModInitializer {
     }
 
     public static void sendDialogueActionMessage(int choice) {
-        PacketByteBuf buf = new PacketByteBuf(buffer());
+        FriendlyByteBuf buf = new FriendlyByteBuf(buffer());
         buf.writeByte(choice);
         ClientPlayNetworking.send(BlabberRegistrar.DIALOGUE_ACTION, buf);
     }

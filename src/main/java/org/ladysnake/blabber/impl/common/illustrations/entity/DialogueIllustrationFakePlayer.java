@@ -22,8 +22,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.render.entity.PlayerModelPart;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Arm;
 import net.minecraft.util.dynamic.Codecs;
 import org.ladysnake.blabber.api.illustration.DialogueIllustrationType;
@@ -46,7 +46,7 @@ public record DialogueIllustrationFakePlayer(GameProfile profile,
                                              float yOffset,
                                              StareTarget stareAt,
                                              Optional<PlayerModelOptions> modelOptions,
-                                             Optional<NbtCompound> data) implements DialogueIllustrationEntity {
+                                             Optional<CompoundTag> data) implements DialogueIllustrationEntity {
     private static final Codec<DialogueIllustrationFakePlayer> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codecs.GAME_PROFILE.fieldOf("profile").forGetter(DialogueIllustrationFakePlayer::profile),
             FailingOptionalFieldCodec.of(IllustrationAnchor.CODEC, "anchor", IllustrationAnchor.TOP_LEFT).forGetter(DialogueIllustrationFakePlayer::anchor),
@@ -58,7 +58,7 @@ public record DialogueIllustrationFakePlayer(GameProfile profile,
             FailingOptionalFieldCodec.of(Codec.FLOAT, "y_offset", 0.0f).forGetter(DialogueIllustrationFakePlayer::yOffset),
             FailingOptionalFieldCodec.of(StareTarget.CODEC, "stare_at", StareTarget.FOLLOW_MOUSE).forGetter(DialogueIllustrationFakePlayer::stareAt),
             FailingOptionalFieldCodec.of(PlayerModelOptions.CODEC, "model_customization").forGetter(DialogueIllustrationFakePlayer::modelOptions),
-            FailingOptionalFieldCodec.of(NbtCompound.CODEC, "data").forGetter(DialogueIllustrationFakePlayer::data)
+            FailingOptionalFieldCodec.of(CompoundTag.CODEC, "data").forGetter(DialogueIllustrationFakePlayer::data)
     ).apply(instance, DialogueIllustrationFakePlayer::new));
     // Need to have a MapCodecCodec here, otherwise it will deserialize differently
     public static final DialogueIllustrationType<DialogueIllustrationFakePlayer> TYPE = new DialogueIllustrationType<>(
@@ -74,7 +74,7 @@ public record DialogueIllustrationFakePlayer(GameProfile profile,
                     buf.readFloat(),
                     new StareTarget(buf),
                     buf.readOptional(PlayerModelOptions::new),
-                    buf.readOptional(PacketByteBuf::readNbt)
+                    buf.readOptional(FriendlyByteBuf::readNbt)
             ),
             (buf, i) -> {
                 buf.writeGameProfile(i.profile());
@@ -87,7 +87,7 @@ public record DialogueIllustrationFakePlayer(GameProfile profile,
                 buf.writeFloat(i.yOffset());
                 StareTarget.writeToPacket(buf, i.stareAt());
                 buf.writeOptional(i.modelOptions(), (b, opts) -> opts.writeToBuffer(b));
-                buf.writeOptional(i.data(), PacketByteBuf::writeNbt);
+                buf.writeOptional(i.data(), FriendlyByteBuf::writeNbt);
             }
     );
 
@@ -140,11 +140,11 @@ public record DialogueIllustrationFakePlayer(GameProfile profile,
                 FailingOptionalFieldCodec.of(PLAYER_MODEL_PARTS_CODEC, "visible_parts", DEFAULT_VISIBLE_PARTS).forGetter(PlayerModelOptions::visibleParts)
         ).apply(instance, PlayerModelOptions::new));
 
-        public PlayerModelOptions(PacketByteBuf buf) {
+        public PlayerModelOptions(FriendlyByteBuf buf) {
             this(buf.readEnumConstant(Arm.class), buf.readEnumSet(PlayerModelPart.class));
         }
 
-        public void writeToBuffer(PacketByteBuf buf) {
+        public void writeToBuffer(FriendlyByteBuf buf) {
             buf.writeEnumConstant(this.mainHand);
             buf.writeEnumSet(this.visibleParts, PlayerModelPart.class);
         }

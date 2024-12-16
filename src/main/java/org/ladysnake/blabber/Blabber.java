@@ -21,13 +21,13 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.Registry;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
@@ -52,8 +52,8 @@ public final class Blabber implements ModInitializer {
 	public static final String MOD_ID = "blabber";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
-	public static Identifier id(String path) {
-		return new Identifier(MOD_ID, path);
+	public static ResourceLocation id(String path) {
+		return new ResourceLocation(MOD_ID, path);
 	}
 
 	/**
@@ -62,15 +62,15 @@ public final class Blabber implements ModInitializer {
 	 * <p>This operation closes the player's {@linkplain  PlayerEntity#currentScreenHandler current screen handler},
 	 * if any, and opens a new dialogue screen instead.
 	 *
-	 * <p>A dialogue may fail to start if it contains malformed texts as per {@link net.minecraft.text.Texts#parse(ServerCommandSource, Text, Entity, int)}.
+	 * <p>A dialogue may fail to start if it contains malformed texts as per {@link net.minecraft.network.chat.Components#parse(CommandSourceStack, Text, Entity, int)}.
 	 * In that case, this method will throw a {@link DialogueInitializationException}.
 	 *
 	 * @param player the player for whom to initiate a dialogue
-	 * @param id the identifier for the dialogue
+	 * @param id the ResourceLocation for the dialogue
 	 * @throws IllegalArgumentException if {@code id} is not a valid dialogue in this game instance
 	 * @throws DialogueInitializationException if the dialogue failed to initialize
 	 */
-	public static void startDialogue(ServerPlayerEntity player, Identifier id) {
+	public static void startDialogue(ServerPlayer player, ResourceLocation id) {
 		startDialogue(player, id, null);
 	}
 
@@ -80,16 +80,16 @@ public final class Blabber implements ModInitializer {
 	 * <p>This operation closes the player's {@linkplain  PlayerEntity#currentScreenHandler current screen handler},
 	 * if any, and opens a new dialogue screen instead.
 	 *
-	 * <p>A dialogue may fail to start if it contains malformed texts as per {@link net.minecraft.text.Texts#parse(ServerCommandSource, Text, Entity, int)}.
+	 * <p>A dialogue may fail to start if it contains malformed texts as per {@link net.minecraft.network.chat.Components#parse(CommandSourceStack, Text, Entity, int)}.
 	 * In that case, this method will throw a {@link DialogueInitializationException}.
 	 *
 	 * @param player the player for whom to initiate a dialogue
-	 * @param id the identifier for the dialogue
+	 * @param id the ResourceLocation for the dialogue
 	 * @param interlocutor the entity with which the player is conversing
 	 * @throws IllegalArgumentException if {@code id} is not a valid dialogue in this game instance
 	 * @throws DialogueInitializationException if the dialogue failed to initialize
 	 */
-	public static void startDialogue(ServerPlayerEntity player, Identifier id, @Nullable Entity interlocutor) {
+	public static void startDialogue(ServerPlayer player, ResourceLocation id, @Nullable Entity interlocutor) {
 		try {
 			PlayerDialogueTracker.get(player).startDialogue(id, interlocutor);
 		} catch (CommandSyntaxException e) {
@@ -100,14 +100,14 @@ public final class Blabber implements ModInitializer {
 	/**
 	 * Ends the current dialogue if its id equals {@code expectedDialogue}.
 	 *
-	 * <p>If the identifiers match, the current dialogue will be ended no matter
+	 * <p>If the ResourceLocations match, the current dialogue will be ended no matter
 	 * its state.
 	 *
 	 * @param player the player for whom to end the current dialogue
-	 * @param expectedDialogue the identifier being compared to the current dialogue, or {@code null} to end any ongoing dialogue
+	 * @param expectedDialogue the ResourceLocation being compared to the current dialogue, or {@code null} to end any ongoing dialogue
 	 */
-	public static void endDialogue(ServerPlayerEntity player, @Nullable Identifier expectedDialogue) {
-		Identifier currentDialogueId = PlayerDialogueTracker.get(player).getCurrentDialogue().map(DialogueStateMachine::getId).orElse(null);
+	public static void endDialogue(ServerPlayer player, @Nullable ResourceLocation expectedDialogue) {
+		ResourceLocation currentDialogueId = PlayerDialogueTracker.get(player).getCurrentDialogue().map(DialogueStateMachine::getId).orElse(null);
 		if (currentDialogueId != null && (expectedDialogue == null || expectedDialogue.equals(currentDialogueId))) {
 			PlayerDialogueTracker.get(player).endDialogue();
 		}
@@ -116,54 +116,54 @@ public final class Blabber implements ModInitializer {
 	/**
 	 * Register a basic {@link DialogueAction} to handle dialogue choices.
 	 *
-	 * @param actionId the identifier used to reference the action in dialogue definition files
+	 * @param actionId the ResourceLocation used to reference the action in dialogue definition files
 	 * @param action   the action to run when triggered by a player
-	 * @see #registerAction(Identifier, Codec)
+	 * @see #registerAction(ResourceLocation, Codec)
 	 */
-	public static void registerAction(Identifier actionId, DialogueAction action) {
+	public static void registerAction(ResourceLocation actionId, DialogueAction action) {
 		registerAction(actionId, Codec.unit(action));
 	}
 
 	/**
 	 * Register a basic {@link DialogueAction} to handle dialogue choices.
 	 *
-	 * @param actionId the identifier used to reference the action in dialogue definition files
+	 * @param actionId the ResourceLocation used to reference the action in dialogue definition files
 	 * @param action   the action to run when triggered by a player
-	 * @see #registerAction(Identifier, Codec)
+	 * @see #registerAction(ResourceLocation, Codec)
 	 */
-	public static void registerAction(Identifier actionId, DialogueActionV2 action) {
+	public static void registerAction(ResourceLocation actionId, DialogueActionV2 action) {
 		registerAction(actionId, Codec.unit(action));
 	}
 
 	/**
 	 * Register a configurable {@link DialogueAction} to handle dialogue choices.
 	 *
-	 * @param actionId the identifier used to reference the action in dialogue definition files
+	 * @param actionId the ResourceLocation used to reference the action in dialogue definition files
 	 * @param codec    a codec for deserializing dialogue actions using the given value
-	 * @see #registerAction(Identifier, DialogueAction)
+	 * @see #registerAction(ResourceLocation, DialogueAction)
 	 */
-	public static void registerAction(Identifier actionId, Codec<? extends DialogueActionV2> codec) {
+	public static void registerAction(ResourceLocation actionId, Codec<? extends DialogueActionV2> codec) {
 		Registry.register(BlabberRegistrar.ACTION_REGISTRY, actionId, codec);
 	}
 
 	/**
 	 * Register a configurable {@link DialogueIllustrationType} to draw extra features in dialogues.
 	 *
-	 * @param illustrationId the identifier used to reference the illustration type in dialogue definition files
+	 * @param illustrationId the ResourceLocation used to reference the illustration type in dialogue definition files
 	 * @param type           the dialogue illustration type
 	 */
-	public static void registerIllustration(Identifier illustrationId, DialogueIllustrationType<?> type) {
+	public static void registerIllustration(ResourceLocation illustrationId, DialogueIllustrationType<?> type) {
 		Registry.register(BlabberRegistrar.ILLUSTRATION_REGISTRY, illustrationId, type);
 	}
 
 	/**
 	 * Register a configurable {@link DialogueLayoutType} to handle the general look of a dialogue.
 	 *
-	 * @param layoutId the identifier used to reference the layout type in dialogue definition files
+	 * @param layoutId the ResourceLocation used to reference the layout type in dialogue definition files
 	 * @param type           the dialogue layout type
 	 */
 	@ApiStatus.Experimental
-	public static void registerLayout(Identifier layoutId, DialogueLayoutType<?> type) {
+	public static void registerLayout(ResourceLocation layoutId, DialogueLayoutType<?> type) {
 		Registry.register(BlabberRegistrar.LAYOUT_REGISTRY, layoutId, type);
 	}
 

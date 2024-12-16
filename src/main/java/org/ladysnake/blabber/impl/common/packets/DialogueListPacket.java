@@ -19,23 +19,23 @@ package org.ladysnake.blabber.impl.common.packets;
 
 import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import org.ladysnake.blabber.Blabber;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public record DialogueListPacket(Set<Identifier> dialogueIds) implements FabricPacket {
+public record DialogueListPacket(Set<ResourceLocation> dialogueIds) implements FabricPacket {
     public static final PacketType<DialogueListPacket> TYPE = PacketType.create(Blabber.id("dialogue_list"), DialogueListPacket::new);
 
-    public DialogueListPacket(PacketByteBuf buf) {
-        this(buf.<Identifier, Set<Identifier>>readCollection(HashSet::new, PacketByteBuf::readIdentifier));
+    public DialogueListPacket(FriendlyByteBuf buf) {
+        this(buf.<ResourceLocation, Set<ResourceLocation>>readCollection(HashSet::new, FriendlyByteBuf::readResourceLocation));
     }
 
     @Override
-    public void write(PacketByteBuf buf) {
-        buf.writeCollection(dialogueIds(), PacketByteBuf::writeIdentifier);
+    public void write(FriendlyByteBuf buf) {
+        buf.writeCollection(dialogueIds(), FriendlyByteBuf::writeResourceLocation);
     }
 
     @Override

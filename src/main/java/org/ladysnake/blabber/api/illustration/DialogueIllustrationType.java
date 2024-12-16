@@ -18,7 +18,7 @@
 package org.ladysnake.blabber.api.illustration;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.ApiStatus;
 import org.ladysnake.blabber.impl.common.BlabberRegistrar;
 import org.ladysnake.blabber.impl.common.illustrations.DialogueIllustrationCollection;
@@ -42,10 +42,10 @@ public final class DialogueIllustrationType<T extends DialogueIllustration> {
     );
 
     private final Codec<T> codec;
-    private final Function<PacketByteBuf, T> read;
-    private final BiConsumer<PacketByteBuf, T> write;
+    private final Function<FriendlyByteBuf, T> read;
+    private final BiConsumer<FriendlyByteBuf, T> write;
 
-    public DialogueIllustrationType(Codec<T> codec, Function<PacketByteBuf, T> read, BiConsumer<PacketByteBuf, T> write) {
+    public DialogueIllustrationType(Codec<T> codec, Function<FriendlyByteBuf, T> read, BiConsumer<FriendlyByteBuf, T> write) {
         this.codec = codec;
         this.read = read;
         this.write = write;
@@ -64,7 +64,7 @@ public final class DialogueIllustrationType<T extends DialogueIllustration> {
      * @return a newly parsed DialogueIllustration corresponding to this type
      */
     @ApiStatus.Experimental
-    public T readFromPacket(PacketByteBuf buf) {
+    public T readFromPacket(FriendlyByteBuf buf) {
         return this.read.apply(buf);
     }
 
@@ -74,7 +74,7 @@ public final class DialogueIllustrationType<T extends DialogueIllustration> {
      * @param toWrite the illustration to write
      */
     @ApiStatus.Experimental
-    public void writeToPacket(PacketByteBuf buf, T toWrite) {
+    public void writeToPacket(FriendlyByteBuf buf, T toWrite) {
         this.write.accept(buf, toWrite);
     }
 
@@ -83,7 +83,7 @@ public final class DialogueIllustrationType<T extends DialogueIllustration> {
      * Make sure it's safe.
      */
     @ApiStatus.Internal
-    public void writeToPacketUnsafe(PacketByteBuf buf, DialogueIllustration illustration) {
+    public void writeToPacketUnsafe(FriendlyByteBuf buf, DialogueIllustration illustration) {
         //noinspection unchecked
         this.writeToPacket(buf, (T) illustration);
     }

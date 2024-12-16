@@ -20,11 +20,11 @@ package org.ladysnake.blabber.impl.common.model;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.entity.Entity;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
-import net.minecraft.text.Texts;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Components;
 import net.minecraft.util.dynamic.Codecs;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
@@ -53,23 +53,23 @@ public record DialogueState(
             FailingOptionalFieldCodec.of(Codec.STRING.xmap(s -> Enum.valueOf(ChoiceResult.class, s.toUpperCase(Locale.ROOT)), Enum::name), "type", ChoiceResult.DEFAULT).forGetter(DialogueState::type)
     ).apply(instance, DialogueState::new));
 
-    public static void writeToPacket(PacketByteBuf buf, DialogueState state) {
+    public static void writeToPacket(FriendlyByteBuf buf, DialogueState state) {
         buf.writeText(state.text());
-        buf.writeCollection(state.illustrations(), PacketByteBuf::writeString);
+        buf.writeCollection(state.illustrations(), FriendlyByteBuf::writeString);
         buf.writeCollection(state.choices(), DialogueChoice::writeToPacket);
         buf.writeEnumConstant(state.type());
         // not writing the action, the client most likely does not need to know about it
     }
 
-    public DialogueState(PacketByteBuf buf) {
-        this(buf.readText(), buf.readCollection(ArrayList::new, PacketByteBuf::readString), buf.readList(DialogueChoice::new), Optional.empty(), buf.readEnumConstant(ChoiceResult.class));
+    public DialogueState(FriendlyByteBuf buf) {
+        this(buf.readText(), buf.readCollection(ArrayList::new, FriendlyByteBuf::readString), buf.readList(DialogueChoice::new), Optional.empty(), buf.readEnumConstant(ChoiceResult.class));
     }
 
     public String getNextState(int choice) {
         return this.choices.get(choice).next();
     }
 
-    public DialogueState parseText(@Nullable ServerCommandSource source, @Nullable Entity sender) throws CommandSyntaxException {
+    public DialogueState parseText(@Nullable CommandSourceStack source, @Nullable Entity sender) throws CommandSyntaxException {
         List<DialogueChoice> parsedChoices = new ArrayList<>(choices().size());
         for (DialogueChoice choice : choices()) {
             parsedChoices.add(choice.parseText(source, sender));

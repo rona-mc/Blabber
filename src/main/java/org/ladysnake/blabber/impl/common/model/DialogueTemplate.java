@@ -20,9 +20,9 @@ package org.ladysnake.blabber.impl.common.model;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.entity.Entity;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.commands.CommandSourceStack;
 import org.jetbrains.annotations.Nullable;
 import org.ladysnake.blabber.api.illustration.DialogueIllustration;
 import org.ladysnake.blabber.api.illustration.DialogueIllustrationType;
@@ -44,11 +44,11 @@ public record DialogueTemplate(String start, boolean unskippable, Map<String, Di
             FailingOptionalFieldCodec.of(DialogueLayoutType.CODEC, "layout", DialogueLayout.DEFAULT).forGetter(DialogueTemplate::layout)
     ).apply(instance, DialogueTemplate::new));
 
-    public static void writeToPacket(PacketByteBuf buf, DialogueTemplate dialogue) {
+    public static void writeToPacket(FriendlyByteBuf buf, DialogueTemplate dialogue) {
         buf.writeString(dialogue.start());
         buf.writeBoolean(dialogue.unskippable());
-        buf.writeMap(dialogue.states(), PacketByteBuf::writeString, DialogueState::writeToPacket);
-        buf.writeMap(dialogue.illustrations(), PacketByteBuf::writeString, (b, i) -> {
+        buf.writeMap(dialogue.states(), FriendlyByteBuf::writeString, DialogueState::writeToPacket);
+        buf.writeMap(dialogue.illustrations(), FriendlyByteBuf::writeString, (b, i) -> {
             // Write the type, then the packet itself.
             b.writeRegistryValue(BlabberRegistrar.ILLUSTRATION_REGISTRY, i.getType());
             i.getType().writeToPacketUnsafe(b, i);
@@ -56,15 +56,15 @@ public record DialogueTemplate(String start, boolean unskippable, Map<String, Di
         DialogueLayoutType.writeToPacket(buf, dialogue.layout());
     }
 
-    public DialogueTemplate(PacketByteBuf buf) {
-        this(buf.readString(), buf.readBoolean(), buf.readMap(PacketByteBuf::readString, DialogueState::new), buf.readMap(PacketByteBuf::readString, b -> {
+    public DialogueTemplate(FriendlyByteBuf buf) {
+        this(buf.readString(), buf.readBoolean(), buf.readMap(FriendlyByteBuf::readString, DialogueState::new), buf.readMap(FriendlyByteBuf::readString, b -> {
             DialogueIllustrationType<?> type = b.readRegistryValue(BlabberRegistrar.ILLUSTRATION_REGISTRY);
             assert type != null;
             return type.readFromPacket(b);
         }), DialogueLayoutType.readFromPacket(buf));
     }
 
-    public DialogueTemplate parseText(@Nullable ServerCommandSource source, @Nullable Entity sender) throws CommandSyntaxException {
+    public DialogueTemplate parseText(@Nullable CommandSourceStack source, @Nullable Entity sender) throws CommandSyntaxException {
         Map<String, DialogueState> parsedStates = new HashMap<>(states().size());
 
         for (Map.Entry<String, DialogueState> state : states().entrySet()) {
