@@ -19,9 +19,9 @@ package org.ladysnake.blabber.api.client.illustration;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import org.ladysnake.blabber.api.client.BlabberClient;
 import org.ladysnake.blabber.api.illustration.DialogueIllustration;
 import org.ladysnake.blabber.api.illustration.DialogueIllustrationType;
-import org.ladysnake.blabber.impl.client.BlabberClient;
 import org.ladysnake.blabber.impl.common.illustrations.PositionTransform;
 
 public abstract class DialogueIllustrationRenderer<I extends DialogueIllustration> {

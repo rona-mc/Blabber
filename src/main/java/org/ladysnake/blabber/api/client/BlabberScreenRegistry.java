@@ -21,7 +21,6 @@ import net.minecraft.client.gui.screens.MenuScreens;
 import org.jetbrains.annotations.ApiStatus;
 import org.ladysnake.blabber.api.layout.DialogueLayout;
 import org.ladysnake.blabber.api.layout.DialogueLayoutType;
-import org.ladysnake.blabber.impl.client.BlabberClient;
 import org.ladysnake.blabber.impl.common.DialogueScreenHandler;
 
 @ApiStatus.Experimental

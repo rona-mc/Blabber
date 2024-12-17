@@ -35,7 +35,6 @@ import org.joml.Vector2i;
 import org.ladysnake.blabber.Blabber;
 import org.ladysnake.blabber.api.client.illustration.DialogueIllustrationRenderer;
 import org.ladysnake.blabber.api.layout.DialogueLayout;
-import org.ladysnake.blabber.impl.client.BlabberClient;
 import org.ladysnake.blabber.impl.common.DialogueScreenHandler;
 import org.ladysnake.blabber.impl.common.illustrations.PositionTransform;
 import org.ladysnake.blabber.impl.common.machine.AvailableChoice;
