@@ -15,20 +15,18 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; If not, see <https://www.gnu.org/licenses>.
  */
-package org.ladysnake.blabber.impl.client.illustrations;
+package org.ladysnake.blabber.api.client.client.compat;
 
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
-import org.ladysnake.blabber.impl.common.illustrations.entity.DialogueIllustrationSelectorEntity;
+/*
+import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
+import me.shedaniel.rei.forge.REIPluginClient;
 
-public class SelectedEntityIllustrationRenderer extends EntityIllustrationRenderer<DialogueIllustrationSelectorEntity> {
-    public SelectedEntityIllustrationRenderer(DialogueIllustrationSelectorEntity illustration) {
-        super(illustration);
-    }
-
+@REIPluginClient
+public class BlabberReiClientPlugin implements REIClientPlugin {
     @Override
-    protected @Nullable LivingEntity getRenderedEntity(Level world) {
-        return this.illustration.getSelectedEntity(world);
+    public void registerScreens(ScreenRegistry registry) {
+        registry.registerDecider(new BlabberOverlayDecider());
     }
 }
+ */

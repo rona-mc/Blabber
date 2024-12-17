@@ -21,7 +21,7 @@
 @FieldsAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 @ApiStatus.Internal
-package org.ladysnake.blabber.impl.client;
+package org.ladysnake.blabber.api.client.client.compat;
 
 import net.minecraft.FieldsAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;

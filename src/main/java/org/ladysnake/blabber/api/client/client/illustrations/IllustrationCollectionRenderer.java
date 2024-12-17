@@ -15,13 +15,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; If not, see <https://www.gnu.org/licenses>.
  */
-package org.ladysnake.blabber.impl.client.illustrations;
+package org.ladysnake.blabber.api.client.client.illustrations;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import org.ladysnake.blabber.api.client.illustration.DialogueIllustrationRenderer;
 import org.ladysnake.blabber.api.illustration.DialogueIllustration;
-import org.ladysnake.blabber.impl.client.BlabberClient;
+import org.ladysnake.blabber.api.client.client.BlabberClient;
 import org.ladysnake.blabber.impl.common.illustrations.DialogueIllustrationCollection;
 import org.ladysnake.blabber.impl.common.illustrations.PositionTransform;
 

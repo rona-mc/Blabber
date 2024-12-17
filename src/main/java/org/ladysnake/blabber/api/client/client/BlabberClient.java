@@ -15,26 +15,23 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; If not, see <https://www.gnu.org/licenses>.
  */
-package org.ladysnake.blabber.impl.client;
+package org.ladysnake.blabber.api.client.client;
 
+import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import org.ladysnake.blabber.Blabber;
 import org.ladysnake.blabber.api.client.BlabberDialogueScreen;
 import org.ladysnake.blabber.api.client.BlabberScreenRegistry;
+import org.ladysnake.blabber.api.client.client.illustrations.*;
 import org.ladysnake.blabber.api.client.illustration.DialogueIllustrationRenderer;
 import org.ladysnake.blabber.api.illustration.DialogueIllustration;
 import org.ladysnake.blabber.api.illustration.DialogueIllustrationType;
 import org.ladysnake.blabber.api.layout.DialogueLayout;
 import org.ladysnake.blabber.api.layout.DialogueLayoutType;
-import org.ladysnake.blabber.impl.client.illustrations.*;
 import org.ladysnake.blabber.impl.common.BlabberRegistrar;
 import org.ladysnake.blabber.impl.common.DialogueRegistry;
 import org.ladysnake.blabber.impl.common.DialogueScreenHandler;
@@ -53,13 +50,12 @@ import java.util.Map;
 
 import static io.netty.buffer.Unpooled.buffer;
 
-@Mod.EventBusSubscriber(modid = Blabber.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-public class BlabberClient {
+public final class BlabberClient implements ClientModInitializer {
     private static final Map<DialogueLayoutType<?>, MenuScreens.ScreenConstructor<?, ?>> screenRegistry = new LinkedHashMap<>();
     private static final Map<DialogueIllustrationType<?>, DialogueIllustrationRenderer.Factory<?>> illustrationRenderers = new LinkedHashMap<>();
 
-    @SubscribeEvent
-    public static void onClientSetup(FMLClientSetupEvent event) {
+    @Override
+    public void onInitializeClient() {
         DialogueIllustrationRenderer.register(DialogueIllustrationCollection.TYPE, IllustrationCollectionRenderer::new);
         DialogueIllustrationRenderer.register(DialogueIllustrationItem.TYPE, ItemIllustrationRenderer::new);
         DialogueIllustrationRenderer.register(DialogueIllustrationNbtEntity.TYPE, NbtEntityIllustrationRenderer::new);
