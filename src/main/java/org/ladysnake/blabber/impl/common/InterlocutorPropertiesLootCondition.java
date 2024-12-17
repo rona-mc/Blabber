@@ -39,7 +39,7 @@ import java.util.Set;
 
 public record InterlocutorPropertiesLootCondition(EntityPredicate predicate) implements LootItemCondition {
     public static final Codec<InterlocutorPropertiesLootCondition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        ExtraCodecs.JSON_ELEMENT.xmap(EntityPredicate::fromJson, EntityPredicate::toJson)
+        ExtraCodecs.JSON.xmap(EntityPredicate::fromJson, EntityPredicate::serializeToJson)
                            .fieldOf("predicate")
                            .forGetter(InterlocutorPropertiesLootCondition::predicate)
     ).apply(instance, InterlocutorPropertiesLootCondition::new));
@@ -47,7 +47,7 @@ public record InterlocutorPropertiesLootCondition(EntityPredicate predicate) imp
     public static final LootItemConditionType TYPE =
         new LootItemConditionType(new Serializer<InterlocutorPropertiesLootCondition>() {
             @Override
-            public void toJson(
+            public void serialize(
                 final JsonObject json,
                 final InterlocutorPropertiesLootCondition object,
                 final JsonSerializationContext context
@@ -60,7 +60,7 @@ public record InterlocutorPropertiesLootCondition(EntityPredicate predicate) imp
             }
 
             @Override
-            public InterlocutorPropertiesLootCondition fromJson(
+            public InterlocutorPropertiesLootCondition deserialize(
                 final JsonObject json,
                 final JsonDeserializationContext context
             ) {
@@ -74,15 +74,15 @@ public record InterlocutorPropertiesLootCondition(EntityPredicate predicate) imp
     }
 
     @Override
-    public Set<LootContextParam<?>> getRequiredParameters() {
+    public Set<LootContextParam<?>> getReferencedContextParams() {
         return Set.of(LootContextParams.ORIGIN);
     }
 
     @Override
     public boolean test(LootContext lootContext) {
-        Entity entity = lootContext.get(LootContext.EntityTarget.THIS.getParameter());
-        Vec3 origin = lootContext.get(LootContextParams.ORIGIN);
+        Entity entity = lootContext.getParamOrNull(LootContext.EntityTarget.THIS.getParam());
+        Vec3 origin = lootContext.getParamOrNull(LootContextParams.ORIGIN);
         Optional<Entity> interlocutor = PlayerDialogueTracker.KEY.maybeGet(entity).flatMap(PlayerDialogueTracker::getInterlocutor);
-        return interlocutor.isPresent() && this.predicate.test(lootContext.getWorld(), origin, interlocutor.get());
+        return interlocutor.isPresent() && this.predicate.matches(lootContext.getLevel(), origin, interlocutor.get());
     }
 }

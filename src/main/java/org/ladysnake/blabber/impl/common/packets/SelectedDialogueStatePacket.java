@@ -17,14 +17,14 @@
  */
 package org.ladysnake.blabber.impl.common.packets;
 
-//import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-//import net.fabricmc.fabric.api.networking.v1.PacketType;
+import net.fabricmc.fabric.api.networking.v1.FabricPacket;
+import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.FriendlyByteBuf;
 import org.ladysnake.blabber.Blabber;
 
-// TODO
+
 public record SelectedDialogueStatePacket(String stateKey) implements FabricPacket {
-    // TODO
+    
     public static final PacketType<SelectedDialogueStatePacket> TYPE = PacketType.create(Blabber.id("selected_dialogue_state"), SelectedDialogueStatePacket::new);
 
     public SelectedDialogueStatePacket(FriendlyByteBuf buf) {
@@ -36,7 +36,7 @@ public record SelectedDialogueStatePacket(String stateKey) implements FabricPack
         buf.writeUtf(this.stateKey);
     }
 
-    // TODO
+    
     @Override
     public PacketType<?> getType() {
         return TYPE;

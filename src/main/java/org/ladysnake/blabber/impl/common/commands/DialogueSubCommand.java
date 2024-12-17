@@ -20,7 +20,6 @@ package org.ladysnake.blabber.impl.common.commands;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
-//import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.world.entity.Entity;
@@ -55,7 +54,7 @@ public final class DialogueSubCommand {
      */
     private static LiteralArgumentBuilder<CommandSourceStack> dialogueStartCommand() {
         return literal("start")
-                .requires(Permissions.require("dialogue.start", 2)) // TODO
+                .requires((source) -> source.hasPermission(2))
                 .then(argument("dialogue", ResourceLocationArgument.id()).suggests(BlabberRegistrar.ALL_DIALOGUES)
                         .executes(context -> startDialogue(context.getSource(), ResourceLocationArgument.getId(context, "dialogue"), List.of(Objects.requireNonNull(context.getSource().getPlayer())), null))
                         .then(argument("players", EntityArgument.players())

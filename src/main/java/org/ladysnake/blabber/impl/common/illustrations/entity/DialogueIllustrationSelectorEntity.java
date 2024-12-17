@@ -70,7 +70,7 @@ public class DialogueIllustrationSelectorEntity implements DialogueIllustrationE
 
     public LivingEntity getSelectedEntity(Level world) {
         if (this.selectedEntityId == -1) return null; // shortcut
-        Entity e = world.getEntityById(this.selectedEntityId);
+        Entity e = world.getEntity(this.selectedEntityId);
         return e instanceof LivingEntity living ? living : null;
     }
 
@@ -126,8 +126,8 @@ public class DialogueIllustrationSelectorEntity implements DialogueIllustrationE
     @Override
     public DialogueIllustrationSelectorEntity parseText(@Nullable CommandSourceStack source, @Nullable Entity sender) throws CommandSyntaxException {
         if (source != null) {
-            EntitySelector entitySelector = new EntitySelectorParser(new StringReader(spec().selector())).read();
-            Entity e = entitySelector.getEntity(source);
+            EntitySelector entitySelector = new EntitySelectorParser(new StringReader(spec().selector())).parse();
+            Entity e = entitySelector.findSingleEntity(source);
             if (e instanceof LivingEntity living) {
                 this.selectedEntityId = living.getId();
             }
@@ -172,7 +172,7 @@ public class DialogueIllustrationSelectorEntity implements DialogueIllustrationE
         public Spec(FriendlyByteBuf buf) {
             this(
                     buf.readUtf(),
-                    buf.readEnumConstant(IllustrationAnchor.class),
+                    buf.readEnum(IllustrationAnchor.class),
                     buf.readInt(),
                     buf.readInt(),
                     buf.readInt(),
@@ -185,7 +185,7 @@ public class DialogueIllustrationSelectorEntity implements DialogueIllustrationE
 
         public void writeToBuffer(FriendlyByteBuf buf) {
             buf.writeUtf(selector());
-            buf.writeEnumConstant(anchor());
+            buf.writeEnum(anchor());
             buf.writeInt(x());
             buf.writeInt(y());
             buf.writeInt(width());

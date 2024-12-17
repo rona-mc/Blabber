@@ -19,8 +19,7 @@ package org.ladysnake.blabber;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
-//import net.fabricmc.api.ModInitializer;
-//import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.core.Registry;
@@ -181,7 +180,7 @@ public class Blabber {
 
 	private void commonSetup(final FMLCommonSetupEvent event) {
 		BlabberRegistrar.init();
-		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> BlabberCommand.register(dispatcher)); // TODO
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> BlabberCommand.register(dispatcher)); 
 		registerAction(id("command"), CommandDialogueAction.CODEC);
 		registerLayout(id("classic"), BlabberRegistrar.CLASSIC_LAYOUT);
 		registerLayout(id("rpg"), BlabberRegistrar.RPG_LAYOUT);

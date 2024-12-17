@@ -23,6 +23,7 @@ import dev.onyxstudios.cca.api.v3.component.ComponentKey;
 import dev.onyxstudios.cca.api.v3.component.ComponentRegistry;
 import dev.onyxstudios.cca.api.v3.component.tick.ServerTickingComponent;
 //import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -180,7 +181,7 @@ public final class PlayerDialogueTracker implements ServerTickingComponent {
                 ChoiceAvailabilityPacket update = this.updateConditions(serverPlayer, this.currentDialogue);
 
                 if (update != null) {
-                    ServerPlayNetworking.send(serverPlayer, update); // TODO
+                    ServerPlayNetworking.send(serverPlayer, update); 
                 }
             } catch (CommandSyntaxException e) {
                 throw new IllegalStateException("Error while updating dialogue conditions", e);

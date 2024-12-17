@@ -67,8 +67,8 @@ public record DialogueIllustrationNbtEntity(ResourceLocation id, IllustrationAnc
     public static final DialogueIllustrationType<DialogueIllustrationNbtEntity> TYPE = new DialogueIllustrationType<>(
             CODEC,
             buf -> new DialogueIllustrationNbtEntity(
-                    buf.readIdentifier(),
-                    buf.readEnumConstant(IllustrationAnchor.class),
+                    buf.readResourceLocation(),
+                    buf.readEnum(IllustrationAnchor.class),
                     buf.readInt(),
                     buf.readInt(),
                     buf.readInt(),
@@ -79,8 +79,8 @@ public record DialogueIllustrationNbtEntity(ResourceLocation id, IllustrationAnc
                     buf.readOptional(FriendlyByteBuf::readNbt)
             ),
             (buf, i) -> {
-                buf.writeIdentifier(i.id());
-                buf.writeEnumConstant(i.anchor());
+                buf.writeResourceLocation(i.id());
+                buf.writeEnum(i.anchor());
                 buf.writeInt(i.x());
                 buf.writeInt(i.y());
                 buf.writeInt(i.width());

@@ -120,7 +120,7 @@ public class BlabberDialogueScreen<P extends DialogueLayout.Params> extends Abst
     public BlabberDialogueScreen(DialogueScreenHandler handler, Inventory inventory, Component title) {
         super(handler, inventory, title);
         Options options = Minecraft.getInstance().options;
-        this.instructions = Component.translatable("blabber:dialogue.instructions", options.forwardKey.getBoundKeyLocalizedText(), options.backKey.getBoundKeyLocalizedText(), options.inventoryKey.getBoundKeyLocalizedText());
+        this.instructions = Component.translatable("blabber:dialogue.instructions", options.keyUp.getTranslatedKeyMessage(), options.keyDown.getTranslatedKeyMessage(), options.keyInventory.getTranslatedKeyMessage());
         this.illustrationSlots = new EnumMap<>(IllustrationAnchor.class);
         for (IllustrationAnchor anchor : IllustrationAnchor.values()) {
             this.illustrationSlots.put(anchor, new Vector2i(-999, -999));
@@ -129,7 +129,7 @@ public class BlabberDialogueScreen<P extends DialogueLayout.Params> extends Abst
 
     @SuppressWarnings("unchecked")
     protected P params() {
-        return (P) this.handler.getLayout().params();
+        return (P) this.menu.getLayout().params();
     }
 
     @Override
@@ -137,7 +137,7 @@ public class BlabberDialogueScreen<P extends DialogueLayout.Params> extends Abst
         super.init();
         this.prepareLayout();
         this.illustrations.clear();
-        this.handler.getIllustrations().forEach((key, illustration) -> this.illustrations.put(key, BlabberClient.createRenderer(illustration)));
+        this.menu.getIllustrations().forEach((key, illustration) -> this.illustrations.put(key, BlabberClient.createRenderer(illustration)));
     }
 
     protected void prepareLayout() {
@@ -147,8 +147,8 @@ public class BlabberDialogueScreen<P extends DialogueLayout.Params> extends Abst
 
     protected void computeMargins() {
         this.instructionsMinY = this.height - DEFAULT_INSTRUCTIONS_BOTTOM_MARGIN;
-        Component text = this.handler.getCurrentText();
-        this.choiceListMinY = mainTextMinY + this.textRenderer.getWrappedLinesHeight(text, mainTextMaxWidth) + DEFAULT_TITLE_GAP;
+        Component text = this.menu.getCurrentText();
+        this.choiceListMinY = mainTextMinY + this.font.wordWrapHeight(text, mainTextMaxWidth) + DEFAULT_TITLE_GAP;
     }
 
     protected void layoutIllustrationAnchors() {
@@ -159,7 +159,7 @@ public class BlabberDialogueScreen<P extends DialogueLayout.Params> extends Abst
 
     @Override
     public boolean shouldCloseOnEsc() {
-        return !this.handler.isUnskippable();
+        return !this.menu.isUnskippable();
     }
 
     @Override
@@ -173,14 +173,14 @@ public class BlabberDialogueScreen<P extends DialogueLayout.Params> extends Abst
     @Override
     public boolean keyPressed(int key, int scancode, int modifiers) {
         Options options = Minecraft.getInstance().options;
-        if (key == GLFW.GLFW_KEY_ENTER || options.inventoryKey.matchesKey(key, scancode)) {
+        if (key == GLFW.GLFW_KEY_ENTER || options.keyInventory.matches(key, scancode)) {
             this.confirmChoice(this.selectedChoice);
             return true;
         }
         boolean tab = GLFW.GLFW_KEY_TAB == key;
-        boolean down = options.backKey.matchesKey(key, scancode);
+        boolean down = options.keyDown.matches(key, scancode);
         boolean shift = (GLFW.GLFW_MOD_SHIFT & modifiers) != 0;
-        if (tab || down || options.forwardKey.matchesKey(key, scancode)) {
+        if (tab || down || options.keyUp.matches(key, scancode)) {
             scrollDialogueChoice(tab && !shift || down ? -1 : 1);
             return true;
         }
@@ -188,20 +188,20 @@ public class BlabberDialogueScreen<P extends DialogueLayout.Params> extends Abst
     }
 
     private @Nullable ChoiceResult confirmChoice(int selectedChoice) {
-        assert this.client != null;
-        if (this.handler.getAvailableChoices().get(selectedChoice).unavailabilityMessage().isPresent()) {
+        assert this.minecraft != null;
+        if (this.menu.getAvailableChoices().get(selectedChoice).unavailabilityMessage().isPresent()) {
             return null;
         }
 
         ChoiceResult result = this.makeChoice(selectedChoice);
 
         switch (result) {
-            case END_DIALOGUE -> this.client.setScreen(null);
+            case END_DIALOGUE -> this.minecraft.setScreen(null);
             case ASK_CONFIRMATION -> {
-                ImmutableList<AvailableChoice> choices = this.handler.getAvailableChoices();
-                this.client.setScreen(new ConfirmScreen(
+                ImmutableList<AvailableChoice> choices = this.menu.getAvailableChoices();
+                this.minecraft.setScreen(new ConfirmScreen(
                         this::onBigChoiceMade,
-                        this.handler.getCurrentText(),
+                        this.menu.getCurrentText(),
                         Component.empty(),
                         choices.get(0).text(),
                         choices.get(1).text()
@@ -218,9 +218,9 @@ public class BlabberDialogueScreen<P extends DialogueLayout.Params> extends Abst
     }
 
     private void onBigChoiceMade(boolean yes) {
-        assert client != null;
+        assert minecraft != null;
         if (this.confirmChoice(yes ? 0 : 1) == ChoiceResult.DEFAULT) {
-            this.client.setScreen(this);
+            this.minecraft.setScreen(this);
         }
     }
 
@@ -231,7 +231,7 @@ public class BlabberDialogueScreen<P extends DialogueLayout.Params> extends Abst
     }
 
     protected void scrollDialogueChoice(double scrollAmount) {
-        ImmutableList<AvailableChoice> availableChoices = this.handler.getAvailableChoices();
+        ImmutableList<AvailableChoice> availableChoices = this.menu.getAvailableChoices();
         if (!availableChoices.isEmpty()) {
             this.selectedChoice = Math.floorMod((int) (this.selectedChoice - scrollAmount), availableChoices.size());
         }
@@ -239,12 +239,12 @@ public class BlabberDialogueScreen<P extends DialogueLayout.Params> extends Abst
 
     @Override
     public void mouseMoved(double mouseX, double mouseY) {
-        ImmutableList<AvailableChoice> choices = this.handler.getAvailableChoices();
+        ImmutableList<AvailableChoice> choices = this.menu.getAvailableChoices();
         int y = this.choiceListMinY;
         for (int i = 0; i < choices.size(); i++) {
             Component choice = choices.get(i).text();
-            int strHeight = this.textRenderer.getWrappedLinesHeight(choice, choiceListMaxWidth);
-            int strWidth = strHeight == 9 ? this.textRenderer.getWidth(choice) : choiceListMaxWidth;
+            int strHeight = this.font.wordWrapHeight(choice, choiceListMaxWidth);
+            int strWidth = strHeight == 9 ? this.font.width(choice) : choiceListMaxWidth;
             if (this.shouldSelectChoice(mouseX, mouseY, y, strHeight, strWidth)) {
                 this.selectedChoice = i;
                 this.hoveringChoice = true;
@@ -263,40 +263,40 @@ public class BlabberDialogueScreen<P extends DialogueLayout.Params> extends Abst
     public void render(GuiGraphics context, int mouseX, int mouseY, float tickDelta) {
         this.renderBackground(context);
 
-        assert client != null;
-        assert client.player != null;
+        assert minecraft != null;
+        assert minecraft.player != null;
 
         PositionTransform positionTransform = this.createPositionTransform();
         positionTransform.setControlPoints(0, 0, this.width, this.height);
 
         int y = mainTextMinY;
 
-        for (String illustrationName : this.handler.getCurrentIllustrations()) {
-            this.getIllustrationRenderer(illustrationName).render(context, this.textRenderer, positionTransform, mouseX, mouseY, tickDelta);
+        for (String illustrationName : this.menu.getCurrentIllustrations()) {
+            this.getIllustrationRenderer(illustrationName).render(context, this.font, positionTransform, mouseX, mouseY, tickDelta);
         }
 
-        Component mainText = this.handler.getCurrentText();
+        Component mainText = this.menu.getCurrentText();
 
-        context.drawTextWrapped(this.textRenderer, mainText, mainTextMinX, y, mainTextMaxWidth, mainTextColor);
+        context.drawWordWrap(this.font, mainText, mainTextMinX, y, mainTextMaxWidth, mainTextColor);
         y = this.choiceListMinY;
-        ImmutableList<AvailableChoice> choices = this.handler.getAvailableChoices();
+        ImmutableList<AvailableChoice> choices = this.menu.getAvailableChoices();
 
         for (int i = 0; i < choices.size(); i++) {
             AvailableChoice choice = choices.get(i);
-            int strHeight = this.textRenderer.getWrappedLinesHeight(choice.text(), choiceListMaxWidth);
+            int strHeight = this.font.wordWrapHeight(choice.text(), choiceListMaxWidth);
             boolean selected = i == this.selectedChoice;
             int choiceColor = choice.unavailabilityMessage().isPresent() ? lockedChoiceColor : selected ? selectedChoiceColor : this.choiceColor;
-            context.drawTextWrapped(this.textRenderer, choice.text(), choiceListMinX, y, choiceListMaxWidth, choiceColor);
+            context.drawWordWrap(this.font, choice.text(), choiceListMinX, y, choiceListMaxWidth, choiceColor);
 
             positionTransform.setControlPoints(choiceListMinX, y, choiceListMinX + choiceListMaxWidth, y + strHeight);
 
             for (String illustrationName : choice.illustrations()) {
-                this.getIllustrationRenderer(illustrationName).render(context, this.textRenderer, positionTransform, mouseX, mouseY, tickDelta);
+                this.getIllustrationRenderer(illustrationName).render(context, this.font, positionTransform, mouseX, mouseY, tickDelta);
             }
 
             if (selected) {
                 if (choice.unavailabilityMessage().isPresent()) {
-                    context.drawTexture(
+                    context.blit(
                             lockIconTexture,
                             selectionIconMinX,
                             y + selectionIconMarginTop,
@@ -308,14 +308,14 @@ public class BlabberDialogueScreen<P extends DialogueLayout.Params> extends Abst
                             selectionIconSize,
                             selectionIconSize
                     );
-                    context.drawTooltip(
-                            this.textRenderer,
+                    context.renderTooltip(
+                            this.font,
                             choice.unavailabilityMessage().get(),
                             this.hoveringChoice ? mouseX : choiceListMaxWidth,
                             this.hoveringChoice ? mouseY : y
                     );
                 } else {
-                    context.drawTexture(
+                    context.blit(
                             selectionIconTexture,
                             selectionIconMinX,
                             y + selectionIconMarginTop,
@@ -332,13 +332,18 @@ public class BlabberDialogueScreen<P extends DialogueLayout.Params> extends Abst
             y += strHeight + choiceGap;
         }
 
-        context.drawTextWrapped(this.textRenderer, instructions, Math.max((this.width - this.textRenderer.getWidth(instructions)) / 2, 5), instructionsMinY, this.width - 5, 0x808080);
+        context.drawWordWrap(this.font, instructions, Math.max((this.width - this.font.width(instructions)) / 2, 5), instructionsMinY, this.width - 5, 0x808080);
 
-        BlabberSettingsComponent settings = BlabberSettingsComponent.get(client.player);
+        BlabberSettingsComponent settings = BlabberSettingsComponent.get(minecraft.player);
         if (settings.isDebugEnabled()) {
             positionTransform.setControlPoints(0, 0, this.width, this.height);
             renderDebugInfo(settings, context, positionTransform, mouseX, mouseY);
         }
+    }
+
+    @Override
+    protected void renderBg(GuiGraphics guiGraphics, float v, int i, int i1) {
+
     }
 
     private DialogueIllustrationRenderer<?> getIllustrationRenderer(String illustrationName) {
@@ -360,18 +365,18 @@ public class BlabberDialogueScreen<P extends DialogueLayout.Params> extends Abst
     protected void renderAnchorDebugInfo(GuiGraphics context, PositionTransform positionTransform, int mouseX, int mouseY) {
         for (IllustrationAnchor anchor : IllustrationAnchor.values()) {
             int color = DEBUG_COLORS[anchor.ordinal() % DEBUG_COLORS.length];
-            context.drawText(this.textRenderer, "x", positionTransform.transformX(anchor, -3), positionTransform.transformY(anchor, -5), color, true);
-            MutableComponent text = Component.empty().append(Component.literal(anchor.asString()).styled(s -> s.withColor(color))).append(" > X: " + positionTransform.inverseTransformX(anchor, mouseX) + ", Y: " + positionTransform.inverseTransformY(anchor, mouseY));
+            context.drawString(this.font, "x", positionTransform.transformX(anchor, -3), positionTransform.transformY(anchor, -5), color, true);
+            MutableComponent text = Component.empty().append(Component.literal(anchor.getSerializedName()).withStyle(s -> s.withColor(color))).append(" > X: " + positionTransform.inverseTransformX(anchor, mouseX) + ", Y: " + positionTransform.inverseTransformY(anchor, mouseY));
             switch (anchor) {
-                case TOP_LEFT, TOP_RIGHT -> context.drawTooltip(
-                        this.textRenderer,
+                case TOP_LEFT, TOP_RIGHT -> context.renderTooltip(
+                        this.font,
                         text,
                         positionTransform.transformX(anchor, 0),
                         15
                 );
 
-                default -> context.drawTooltip(
-                        this.textRenderer,
+                default -> context.renderTooltip(
+                        this.font,
                         text,
                         positionTransform.transformX(anchor, 0),
                         positionTransform.transformY(anchor, 0)
@@ -380,19 +385,10 @@ public class BlabberDialogueScreen<P extends DialogueLayout.Params> extends Abst
         }
     }
 
-    @Override
-    protected void drawBackground(GuiGraphics matrices, float delta, int mouseX, int mouseY) {
-        // NO-OP
-    }
-
-    @Override
-    protected void drawForeground(GuiGraphics matrices, int mouseX, int mouseY) {
-        // NO-OP
-    }
 
     public ChoiceResult makeChoice(int choice) {
-        int originalChoiceIndex = this.handler.getAvailableChoices().get(choice).originalChoiceIndex();
-        ChoiceResult result = this.handler.makeChoice(originalChoiceIndex);
+        int originalChoiceIndex = this.menu.getAvailableChoices().get(choice).originalChoiceIndex();
+        ChoiceResult result = this.menu.makeChoice(originalChoiceIndex);
         BlabberClient.sendDialogueActionMessage(originalChoiceIndex);
         return result;
     }

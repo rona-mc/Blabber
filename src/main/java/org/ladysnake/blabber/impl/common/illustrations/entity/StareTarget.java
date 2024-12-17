@@ -38,14 +38,14 @@ public record StareTarget(Optional<IllustrationAnchor> anchor, OptionalInt x,
 
     public StareTarget(FriendlyByteBuf buf) {
         this(
-                buf.readOptional(b -> b.readEnumConstant(IllustrationAnchor.class)),
+                buf.readOptional(b -> b.readEnum(IllustrationAnchor.class)),
                 OptionalSerialization.readOptionalInt(buf),
                 OptionalSerialization.readOptionalInt(buf)
         );
     }
 
     public static void writeToPacket(FriendlyByteBuf buf, StareTarget stareTarget) {
-        buf.writeOptional(stareTarget.anchor(), FriendlyByteBuf::writeEnumConstant);
+        buf.writeOptional(stareTarget.anchor(), FriendlyByteBuf::writeEnum);
         OptionalSerialization.writeOptionalInt(buf, stareTarget.x());
         OptionalSerialization.writeOptionalInt(buf, stareTarget.y());
     }

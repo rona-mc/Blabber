@@ -23,7 +23,7 @@ import org.ladysnake.blabber.api.DialogueActionV2;
 
 public record InstancedDialogueAction<A extends DialogueActionV2>(A action,
                                                                   Codec<A> codec) {
-    public static final Codec<InstancedDialogueAction<?>> CODEC = BlabberRegistrar.ACTION_REGISTRY.getCodec()
+    public static final Codec<InstancedDialogueAction<?>> CODEC = BlabberRegistrar.ACTION_REGISTRY.byNameCodec()
             .dispatch("type", InstancedDialogueAction::codec, InstancedDialogueAction::xmap);
 
     private static <A extends DialogueActionV2> Codec<InstancedDialogueAction<A>> xmap(Codec<A> c) {
@@ -32,7 +32,7 @@ public record InstancedDialogueAction<A extends DialogueActionV2>(A action,
 
     @Override
     public String toString() {
-        ResourceLocation id = BlabberRegistrar.ACTION_REGISTRY.getId(this.codec);
+        ResourceLocation id = BlabberRegistrar.ACTION_REGISTRY.getKey(this.codec);
         if (id == null) return "(unregistered action)";
         return id.toString();
     }

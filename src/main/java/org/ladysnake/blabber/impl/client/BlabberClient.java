@@ -17,8 +17,7 @@
  */
 package org.ladysnake.blabber.impl.client;
 
-//import net.fabricmc.api.ClientModInitializer;
-//import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.network.FriendlyByteBuf;
@@ -75,24 +74,24 @@ public class BlabberClient {
         BlabberScreenRegistry.register(BlabberRegistrar.CLASSIC_LAYOUT, BlabberDialogueScreen::new);
         BlabberScreenRegistry.register(BlabberRegistrar.RPG_LAYOUT, BlabberRpgDialogueScreen::new);
         MenuScreens.register(BlabberRegistrar.DIALOGUE_SCREEN_HANDLER, (MenuScreens.ScreenConstructor<DialogueScreenHandler, BlabberDialogueScreen<?>>) BlabberClient::createDialogueScreen);
-        // TODO
+        
         ClientPlayNetworking.registerGlobalReceiver(
                 DialogueListPacket.TYPE,
                 (packet, player, responseSender) -> DialogueRegistry.setClientIds(packet.dialogueIds())
         );
-        // TODO
+        
         ClientPlayNetworking.registerGlobalReceiver(ChoiceAvailabilityPacket.TYPE, (packet, player, responseSender) -> {
             if (player.containerMenu instanceof DialogueScreenHandler dialogueScreenHandler) {
                 dialogueScreenHandler.handleAvailabilityUpdate(packet);
             }
         });
-        // TODO
+        
         ClientPlayNetworking.registerGlobalReceiver(SelectedDialogueStatePacket.TYPE, (packet, player, responseSender) -> {
             if (player.containerMenu instanceof DialogueScreenHandler dialogueScreenHandler) {
                 dialogueScreenHandler.setCurrentState(packet.stateKey());
             }
         });
-        // TODO
+        
         ClientPlayNetworking.registerGlobalReceiver(SelectedDialogueStatePacket.TYPE, (packet, player, responseSender) -> {
             if (player.containerMenu instanceof DialogueScreenHandler dialogueScreenHandler) {
                 dialogueScreenHandler.setCurrentState(packet.stateKey());
@@ -132,6 +131,6 @@ public class BlabberClient {
     public static void sendDialogueActionMessage(int choice) {
         FriendlyByteBuf buf = new FriendlyByteBuf(buffer());
         buf.writeByte(choice);
-        ClientPlayNetworking.send(BlabberRegistrar.DIALOGUE_ACTION, buf); // TODO
+        ClientPlayNetworking.send(BlabberRegistrar.DIALOGUE_ACTION, buf); 
     }
 }

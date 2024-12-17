@@ -22,7 +22,7 @@ import net.minecraft.util.StringRepresentable;
 public enum UnavailableDisplay implements StringRepresentable {
     GRAYED_OUT("grayed_out"), HIDDEN("hidden");
 
-    public static final com.mojang.serialization.Codec<UnavailableDisplay> CODEC = StringRepresentable.createCodec(UnavailableDisplay::values);
+    public static final com.mojang.serialization.Codec<UnavailableDisplay> CODEC = StringRepresentable.fromEnum(UnavailableDisplay::values);
 
     private final String id;
 
@@ -31,7 +31,7 @@ public enum UnavailableDisplay implements StringRepresentable {
     }
 
     @Override
-    public String asString() {
+    public String getSerializedName() {
         return this.id;
     }
 }

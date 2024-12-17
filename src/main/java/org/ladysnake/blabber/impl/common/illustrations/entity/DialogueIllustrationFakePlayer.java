@@ -65,7 +65,7 @@ public record DialogueIllustrationFakePlayer(GameProfile profile,
             CODEC,
             buf -> new DialogueIllustrationFakePlayer(
                     buf.readGameProfile(),
-                    buf.readEnumConstant(IllustrationAnchor.class),
+                    buf.readEnum(IllustrationAnchor.class),
                     buf.readVarInt(),
                     buf.readVarInt(),
                     buf.readVarInt(),
@@ -78,7 +78,7 @@ public record DialogueIllustrationFakePlayer(GameProfile profile,
             ),
             (buf, i) -> {
                 buf.writeGameProfile(i.profile());
-                buf.writeEnumConstant(i.anchor());
+                buf.writeEnum(i.anchor());
                 buf.writeVarInt(i.x());
                 buf.writeVarInt(i.y());
                 buf.writeVarInt(i.width());
@@ -107,7 +107,7 @@ public record DialogueIllustrationFakePlayer(GameProfile profile,
         static {
             partsByName = new HashMap<>();
             for (PlayerModelPart part : PlayerModelPart.values()) {
-                partsByName.put(part.getName(), part);
+                partsByName.put(part.getName().getString(), part);
             }
         }
 
@@ -117,10 +117,12 @@ public record DialogueIllustrationFakePlayer(GameProfile profile,
             return DataResult.error(() -> "Not a valid player model part " + key + " (should be one of " + partsByName.keySet() + ")");
         }
 
-        public static final Codec<EnumSet<PlayerModelPart>> PLAYER_MODEL_PARTS_CODEC = Codec.list(Codec.STRING.comapFlatMap(
-                PlayerModelOptions::partFromString,
-                PlayerModelPart::getName
-        )).xmap(l -> {
+        public static final Codec<EnumSet<PlayerModelPart>> PLAYER_MODEL_PARTS_CODEC = Codec.list(
+                Codec.STRING.comapFlatMap(
+                        PlayerModelOptions::partFromString,
+                        part -> part.getName().getString()
+                )
+        ).xmap(l -> {
             EnumSet<PlayerModelPart> ret = EnumSet.noneOf(PlayerModelPart.class);
             ret.addAll(l);
             return ret;
@@ -141,18 +143,18 @@ public record DialogueIllustrationFakePlayer(GameProfile profile,
         ).apply(instance, PlayerModelOptions::new));
 
         public PlayerModelOptions(FriendlyByteBuf buf) {
-            this(buf.readEnumConstant(HumanoidArm.class), buf.readEnumSet(PlayerModelPart.class));
+            this(buf.readEnum(HumanoidArm.class), buf.readEnumSet(PlayerModelPart.class));
         }
 
         public void writeToBuffer(FriendlyByteBuf buf) {
-            buf.writeEnumConstant(this.mainHand);
+            buf.writeEnum(this.mainHand);
             buf.writeEnumSet(this.visibleParts, PlayerModelPart.class);
         }
 
         public byte packVisibleParts() {
             byte packed = 0;
             for (PlayerModelPart playerModelPart : this.visibleParts()) {
-                packed |= (byte) playerModelPart.getBitFlag();
+                packed |= (byte) playerModelPart.getBit();
             }
             return packed;
         }

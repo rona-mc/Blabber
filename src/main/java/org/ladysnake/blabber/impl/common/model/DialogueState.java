@@ -46,7 +46,7 @@ public record DialogueState(
 ) {
     public static final Codec<DialogueState> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             // Kinda optional, but we still want errors if you got it wrong >:(
-            FailingOptionalFieldCodec.of(ExtraCodecs.TEXT, "text", Component.empty()).forGetter(DialogueState::text),
+            FailingOptionalFieldCodec.of(ExtraCodecs.COMPONENT, "text", Component.empty()).forGetter(DialogueState::text),
             FailingOptionalFieldCodec.of(Codec.list(Codec.STRING), "illustrations", Collections.emptyList()).forGetter(DialogueState::illustrations),
             FailingOptionalFieldCodec.of(Codec.list(DialogueChoice.CODEC), "choices", List.of()).forGetter(DialogueState::choices),
             FailingOptionalFieldCodec.of(InstancedDialogueAction.CODEC, "action").forGetter(DialogueState::action),
@@ -54,15 +54,15 @@ public record DialogueState(
     ).apply(instance, DialogueState::new));
 
     public static void writeToPacket(FriendlyByteBuf buf, DialogueState state) {
-        buf.writeText(state.text());
+        buf.writeComponent(state.text());
         buf.writeCollection(state.illustrations(), FriendlyByteBuf::writeUtf);
         buf.writeCollection(state.choices(), DialogueChoice::writeToPacket);
-        buf.writeEnumConstant(state.type());
+        buf.writeEnum(state.type());
         // not writing the action, the client most likely does not need to know about it
     }
 
     public DialogueState(FriendlyByteBuf buf) {
-        this(buf.readText(), buf.readCollection(ArrayList::new, FriendlyByteBuf::readUtf), buf.readList(DialogueChoice::new), Optional.empty(), buf.readEnumConstant(ChoiceResult.class));
+        this(buf.readComponent(), buf.readCollection(ArrayList::new, FriendlyByteBuf::readUtf), buf.readList(DialogueChoice::new), Optional.empty(), buf.readEnum(ChoiceResult.class));
     }
 
     public String getNextState(int choice) {
@@ -76,7 +76,7 @@ public record DialogueState(
         }
 
         return new DialogueState(
-                ComponentUtils.parse(source, text(), sender, 0),
+                ComponentUtils.updateForEntity(source, text(), sender, 0),
                 illustrations(),
                 parsedChoices,
                 action(),

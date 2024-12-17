@@ -34,20 +34,20 @@ import java.util.Optional;
 public record UnavailableAction(UnavailableDisplay display, Optional<Component> message) {
     public static final Codec<UnavailableAction> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             UnavailableDisplay.CODEC.fieldOf("display").forGetter(UnavailableAction::display),
-            FailingOptionalFieldCodec.of(ExtraCodecs.TEXT, "message").forGetter(UnavailableAction::message)
+            FailingOptionalFieldCodec.of(ExtraCodecs.COMPONENT, "message").forGetter(UnavailableAction::message)
     ).apply(instance, UnavailableAction::new));
 
     public UnavailableAction(FriendlyByteBuf buf) {
-        this(buf.readEnumConstant(UnavailableDisplay.class), buf.readOptional(FriendlyByteBuf::readText));
+        this(buf.readEnum(UnavailableDisplay.class), buf.readOptional(FriendlyByteBuf::readComponent));
     }
 
     public static void writeToPacket(FriendlyByteBuf buf, UnavailableAction action) {
-        buf.writeEnumConstant(action.display());
-        buf.writeOptional(action.message(), FriendlyByteBuf::writeText);
+        buf.writeEnum(action.display());
+        buf.writeOptional(action.message(), FriendlyByteBuf::writeComponent);
     }
 
     public UnavailableAction parseText(@Nullable CommandSourceStack source, @Nullable Entity sender) throws CommandSyntaxException {
-        Optional<Component> parsedMessage = message().isEmpty() ? Optional.empty() : Optional.of(ComponentUtils.parse(source, message().get(), sender, 0));
+        Optional<Component> parsedMessage = message().isEmpty() ? Optional.empty() : Optional.of(ComponentUtils.updateForEntity(source, message().get(), sender, 0));
         return new UnavailableAction(display(), parsedMessage);
     }
 }

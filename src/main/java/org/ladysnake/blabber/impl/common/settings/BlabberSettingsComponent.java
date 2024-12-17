@@ -27,6 +27,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
+import net.sjhub.blabber.entity.BlabberEntity;
 import org.ladysnake.blabber.Blabber;
 import org.ladysnake.blabber.impl.common.commands.SettingsSubCommand;
 
@@ -36,7 +37,7 @@ public class BlabberSettingsComponent implements AutoSyncedComponent {
     public static final ComponentKey<BlabberSettingsComponent> KEY = ComponentRegistry.getOrCreate(Blabber.id("settings"), BlabberSettingsComponent.class);
 
     public static BlabberSettingsComponent get(Player player) {
-        return player.getComponent(KEY);
+        return ((BlabberEntity) player).getComponent(KEY);
     }
 
     private EnumSet<BlabberSetting> enabledSettings = EnumSet.noneOf(BlabberSetting.class);
@@ -47,7 +48,7 @@ public class BlabberSettingsComponent implements AutoSyncedComponent {
     }
 
     public boolean isDebugEnabled() {
-        if (!this.player.getWorld().isClient && !SettingsSubCommand.ALLOW_DEBUG.test(this.player.getCommandSource())) {
+        if (!this.player.level().isClientSide && !SettingsSubCommand.ALLOW_DEBUG.test(this.player.createCommandSourceStack())) {
             return false;
         }
         return !this.enabledSettings.isEmpty();
@@ -94,7 +95,7 @@ public class BlabberSettingsComponent implements AutoSyncedComponent {
     public void readFromNbt(CompoundTag tag) {
         this.enabledSettings = EnumSet.noneOf(BlabberSetting.class);
         for (Tag featureId : tag.getList("enabled_features", Tag.TAG_STRING)) {
-            BlabberSetting feature = BlabberSetting.getById(featureId.asString());
+            BlabberSetting feature = BlabberSetting.getById(featureId.getAsString());
             if (feature != null) {
                 this.enabledSettings.add(feature);
             }
@@ -105,7 +106,7 @@ public class BlabberSettingsComponent implements AutoSyncedComponent {
     public void writeToNbt(CompoundTag tag) {
         ListTag list = new ListTag();
         for (BlabberSetting feature : this.enabledSettings) {
-            list.add(StringTag.of(feature.id()));
+            list.add(StringTag.valueOf(feature.id()));
         }
         tag.put("enabled_features", list);
     }

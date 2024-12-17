@@ -27,15 +27,15 @@ public record CommandDialogueAction(String command) implements DialogueAction {
 
     @Override
     public void handle(ServerPlayer player) {
-        player.server.getCommandManager().executeWithPrefix(
+        player.server.getCommands().performPrefixedCommand(
                 getSource(player),
                 this.command()
         );
     }
 
     public static CommandSourceStack getSource(ServerPlayer player) {
-        return player.getCommandSource()
-                .withOutput(player.server)
-                .withLevel(2);
+        return player.createCommandSourceStack()
+                .withSource(player.server)
+                .withPermission(2);
     }
 }

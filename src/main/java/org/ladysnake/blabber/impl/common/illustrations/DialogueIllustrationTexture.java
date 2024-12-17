@@ -59,8 +59,8 @@ public record DialogueIllustrationTexture(
 
     public static final DialogueIllustrationType<DialogueIllustrationTexture> TYPE = new DialogueIllustrationType<>(CODEC,
             buf -> new DialogueIllustrationTexture(
-                    buf.readIdentifier(),
-                    buf.readEnumConstant(IllustrationAnchor.class),
+                    buf.readResourceLocation(),
+                    buf.readEnum(IllustrationAnchor.class),
                     buf.readVarInt(),
                     buf.readVarInt(),
                     buf.readVarInt(),
@@ -73,8 +73,8 @@ public record DialogueIllustrationTexture(
                     OptionalSerialization.readOptionalInt(buf)
             ),
             (buf, image) -> {
-                buf.writeIdentifier(image.texture());
-                buf.writeEnumConstant(image.anchor());
+                buf.writeResourceLocation(image.texture());
+                buf.writeEnum(image.anchor());
                 buf.writeVarInt(image.x());
                 buf.writeVarInt(image.y());
                 buf.writeVarInt(image.width());

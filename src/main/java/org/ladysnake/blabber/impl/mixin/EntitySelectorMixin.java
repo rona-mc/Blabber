@@ -21,6 +21,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.commands.CommandSourceStack;
+import net.sjhub.blabber.entity.BlabberEntity;
 import org.ladysnake.blabber.impl.common.BlabberEntitySelectorExt;
 import org.ladysnake.blabber.impl.common.PlayerDialogueTracker;
 import org.spongepowered.asm.mixin.Mixin;
@@ -30,6 +31,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
+import java.util.Objects;
 
 @Mixin(EntitySelector.class)
 public abstract class EntitySelectorMixin implements BlabberEntitySelectorExt {
@@ -39,8 +41,8 @@ public abstract class EntitySelectorMixin implements BlabberEntitySelectorExt {
     @Inject(method = "findEntitiesRaw", at = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/EntitySelector;currentEntity:Z"), cancellable = true)
     private void replaceSelf(CommandSourceStack source, CallbackInfoReturnable<List<? extends Entity>> cir) throws CommandSyntaxException {
         if (this.blabber$interlocutorSelector) {
-            // TODO
-            cir.setReturnValue(source.getPlayer().getComponent(PlayerDialogueTracker.KEY).getInterlocutor().map(List::of).orElse(List.of()));
+            
+            cir.setReturnValue(((BlabberEntity) Objects.requireNonNull(source.getPlayer())).getComponent(PlayerDialogueTracker.KEY).getInterlocutor().map(List::of).orElse(List.of()));
         }
     }
 

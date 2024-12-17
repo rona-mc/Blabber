@@ -29,8 +29,8 @@ import java.util.function.Function;
 
 @ApiStatus.Experimental
 public class DialogueLayoutType<P extends DialogueLayout.Params> {
-    // TODO
-    public static final Codec<DialogueLayout<?>> CODEC = BlabberRegistrar.LAYOUT_REGISTRY.getCodec().dispatch(
+    
+    public static final Codec<DialogueLayout<?>> CODEC = BlabberRegistrar.LAYOUT_REGISTRY.byNameCodec().dispatch(
             "type", DialogueLayout::type, DialogueLayoutType::getCodec
     );
 

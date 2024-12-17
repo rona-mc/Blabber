@@ -31,13 +31,13 @@ public class NbtEntityIllustrationRenderer extends EntityIllustrationRenderer<Di
 
     @Override
     protected @Nullable LivingEntity getRenderedEntity(Level world) {
-        EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.getOrEmpty(illustration.id()).orElse(null);
+        EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.getOptional(illustration.id()).orElse(null);
         if (entityType == null) return null;
 
         if (entityType.create(world) instanceof LivingEntity living) {
-            illustration.data().ifPresent(living::readNbt);
-            living.prevBodyYaw = living.bodyYaw = 0.0f;
-            living.prevHeadYaw = living.headYaw = 0.0f;
+            illustration.data().ifPresent(living::load);
+            living.yBodyRotO = living.yBodyRot = 0.0f;
+            living.yHeadRotO = living.yHeadRot = 0.0f;
             return living;
         }
 

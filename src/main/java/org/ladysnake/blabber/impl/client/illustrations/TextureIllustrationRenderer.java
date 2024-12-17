@@ -30,7 +30,7 @@ public class TextureIllustrationRenderer extends DialogueIllustrationRenderer<Di
 
     @Override
     public void render(GuiGraphics context, Font textRenderer, PositionTransform positionTransform, int mouseX, int mouseY, float tickDelta) {
-        context.drawTexture(
+        context.blit(
                 illustration.texture(),
                 illustration.minX(positionTransform),
                 illustration.minY(positionTransform),

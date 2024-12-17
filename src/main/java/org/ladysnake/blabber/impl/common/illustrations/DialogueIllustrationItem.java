@@ -38,10 +38,10 @@ public record DialogueIllustrationItem(ItemStack stack, IllustrationAnchor ancho
 
     public static final DialogueIllustrationType<DialogueIllustrationItem> TYPE = new DialogueIllustrationType<>(
             CODEC,
-            buf -> new DialogueIllustrationItem(ItemStack.fromNbt(buf.readNbt()), buf.readEnumConstant(IllustrationAnchor.class), buf.readInt(), buf.readInt(), buf.readFloat(), buf.readBoolean()),
+            buf -> new DialogueIllustrationItem(ItemStack.of(buf.readNbt()), buf.readEnum(IllustrationAnchor.class), buf.readInt(), buf.readInt(), buf.readFloat(), buf.readBoolean()),
             (buf, item) -> {
-                buf.writeNbt(item.stack().writeNbt(new CompoundTag()));
-                buf.writeEnumConstant(item.anchor());
+                buf.writeNbt(item.stack().save(new CompoundTag()));
+                buf.writeEnum(item.anchor());
                 buf.writeInt(item.x());
                 buf.writeInt(item.y());
                 buf.writeFloat(item.scale());

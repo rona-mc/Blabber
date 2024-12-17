@@ -37,26 +37,26 @@ import java.util.Optional;
 
 public record DialogueChoice(Component text, List<String> illustrations, String next, Optional<DialogueChoiceCondition> condition) {
     public static final Codec<DialogueChoice> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ExtraCodecs.TEXT.fieldOf("text").forGetter(DialogueChoice::text),
+            ExtraCodecs.COMPONENT.fieldOf("text").forGetter(DialogueChoice::text),
             FailingOptionalFieldCodec.of(Codec.list(Codec.STRING), "illustrations", Collections.emptyList()).forGetter(DialogueChoice::illustrations),
             Codec.STRING.fieldOf("next").forGetter(DialogueChoice::next),
             FailingOptionalFieldCodec.of(DialogueChoiceCondition.CODEC, "only_if").forGetter(DialogueChoice::condition)
     ).apply(instance, DialogueChoice::new));
 
     public static void writeToPacket(FriendlyByteBuf buf, DialogueChoice choice) {
-        buf.writeText(choice.text());
+        buf.writeComponent(choice.text());
         buf.writeCollection(choice.illustrations(), FriendlyByteBuf::writeUtf);
         buf.writeUtf(choice.next());
         buf.writeOptional(choice.condition(), DialogueChoiceCondition::writeToPacket);
     }
 
     public DialogueChoice(FriendlyByteBuf buf) {
-        this(buf.readText(), buf.readCollection(ArrayList::new, FriendlyByteBuf::readUtf), buf.readUtf(), buf.readOptional(DialogueChoiceCondition::new));
+        this(buf.readComponent(), buf.readCollection(ArrayList::new, FriendlyByteBuf::readUtf), buf.readUtf(), buf.readOptional(DialogueChoiceCondition::new));
     }
 
     public DialogueChoice parseText(@Nullable CommandSourceStack source, @Nullable Entity sender) throws CommandSyntaxException {
         Optional<DialogueChoiceCondition> parsedCondition = condition().isEmpty() ? Optional.empty() : Optional.of(condition().get().parseText(source, sender));
-        return new DialogueChoice(ComponentUtils.parse(source, text(), sender, 0), illustrations(), next(), parsedCondition);
+        return new DialogueChoice(ComponentUtils.updateForEntity(source, text(), sender, 0), illustrations(), next(), parsedCondition);
     }
 
     @Override
