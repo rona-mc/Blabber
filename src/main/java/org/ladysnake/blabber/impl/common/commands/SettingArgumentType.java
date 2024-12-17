@@ -19,8 +19,8 @@ package org.ladysnake.blabber.impl.common.commands;
 
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.serialization.Codec;
-import net.minecraft.commands.arguments.StringRepresentableArgument;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.StringRepresentableArgument;
 import org.ladysnake.blabber.impl.common.settings.BlabberSetting;
 
 import java.util.function.Supplier;

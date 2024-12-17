@@ -17,8 +17,8 @@
  */
 package org.ladysnake.blabber.impl.mixin;
 
-import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
 import org.ladysnake.blabber.impl.common.settings.BlabberSettingsComponent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

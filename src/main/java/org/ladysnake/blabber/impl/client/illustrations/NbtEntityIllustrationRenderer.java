@@ -17,9 +17,9 @@
  */
 package org.ladysnake.blabber.impl.client.illustrations;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import org.ladysnake.blabber.impl.common.illustrations.entity.DialogueIllustrationNbtEntity;

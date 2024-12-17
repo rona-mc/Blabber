@@ -20,12 +20,12 @@ package org.ladysnake.blabber.impl.common.model;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 import org.ladysnake.blabber.impl.common.serialization.FailingOptionalFieldCodec;
 

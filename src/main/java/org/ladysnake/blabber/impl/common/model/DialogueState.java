@@ -20,22 +20,18 @@ package org.ladysnake.blabber.impl.common.model;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.entity.Entity;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.ladysnake.blabber.impl.common.InstancedDialogueAction;
 import org.ladysnake.blabber.impl.common.serialization.FailingOptionalFieldCodec;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 
 public record DialogueState(
         Component text,

@@ -17,11 +17,11 @@
  */
 package org.ladysnake.blabber.impl.client.illustrations;
 
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import com.mojang.blaze3d.platform.Lighting;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;

@@ -18,11 +18,7 @@
 package org.ladysnake.blabber.impl.common.serialization;
 
 import com.mojang.datafixers.util.Either;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.MapLike;
-import com.mojang.serialization.RecordBuilder;
+import com.mojang.serialization.*;
 
 import java.util.stream.Stream;
 

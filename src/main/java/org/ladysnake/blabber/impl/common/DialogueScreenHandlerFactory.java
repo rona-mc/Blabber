@@ -17,12 +17,12 @@
  */
 package org.ladysnake.blabber.impl.common;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import org.ladysnake.blabber.impl.common.machine.DialogueStateMachine;
 

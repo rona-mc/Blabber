@@ -18,9 +18,9 @@
 package org.ladysnake.blabber.impl.mixin;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.commands.CommandSourceStack;
 import net.sjhub.blabber.entity.BlabberEntity;
 import org.ladysnake.blabber.impl.common.BlabberEntitySelectorExt;
 import org.ladysnake.blabber.impl.common.PlayerDialogueTracker;

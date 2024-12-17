@@ -22,13 +22,7 @@ import org.ladysnake.blabber.impl.common.model.DialogueChoice;
 import org.ladysnake.blabber.impl.common.model.DialogueState;
 import org.ladysnake.blabber.impl.common.model.DialogueTemplate;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public final class DialogueValidator {
     public static ValidationResult validateStructure(DialogueTemplate dialogue) {

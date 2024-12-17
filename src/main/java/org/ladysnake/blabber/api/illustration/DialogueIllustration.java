@@ -18,8 +18,8 @@
 package org.ladysnake.blabber.api.illustration;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 

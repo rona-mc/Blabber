@@ -18,12 +18,12 @@
 package org.ladysnake.blabber.impl.client;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FastColor;
+import net.minecraft.world.entity.player.Inventory;
 import org.joml.Matrix4f;
 import org.ladysnake.blabber.api.client.BlabberDialogueScreen;
 import org.ladysnake.blabber.api.layout.DefaultLayoutParams;

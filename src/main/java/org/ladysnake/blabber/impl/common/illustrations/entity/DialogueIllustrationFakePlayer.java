@@ -21,20 +21,16 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.world.entity.player.PlayerModelPart;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.player.PlayerModelPart;
 import org.ladysnake.blabber.api.illustration.DialogueIllustrationType;
 import org.ladysnake.blabber.impl.common.model.IllustrationAnchor;
 import org.ladysnake.blabber.impl.common.serialization.FailingOptionalFieldCodec;
 
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public record DialogueIllustrationFakePlayer(GameProfile profile,
                                              IllustrationAnchor anchor,

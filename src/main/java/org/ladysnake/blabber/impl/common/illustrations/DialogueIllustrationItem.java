@@ -19,8 +19,8 @@ package org.ladysnake.blabber.impl.common.illustrations;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
 import org.ladysnake.blabber.api.illustration.DialogueIllustrationType;
 import org.ladysnake.blabber.impl.common.model.IllustrationAnchor;
 import org.ladysnake.blabber.impl.common.serialization.FailingOptionalFieldCodec;

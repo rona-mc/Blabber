@@ -18,9 +18,9 @@
 package org.ladysnake.blabber.impl.client.illustrations;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.client.player.RemotePlayer;
-import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;

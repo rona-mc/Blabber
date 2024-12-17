@@ -20,10 +20,10 @@ package org.ladysnake.blabber.impl.common.model;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 import org.ladysnake.blabber.Blabber;
 
