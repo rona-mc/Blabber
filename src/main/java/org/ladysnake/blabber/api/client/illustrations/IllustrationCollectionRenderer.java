@@ -15,33 +15,34 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; If not, see <https://www.gnu.org/licenses>.
  */
-package org.ladysnake.blabber.api.client.client.illustrations;
+package org.ladysnake.blabber.api.client.illustrations;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import org.ladysnake.blabber.api.client.illustration.DialogueIllustrationRenderer;
-import org.ladysnake.blabber.impl.common.illustrations.DialogueIllustrationTexture;
+import org.ladysnake.blabber.api.illustration.DialogueIllustration;
+import org.ladysnake.blabber.api.client.BlabberClient;
+import org.ladysnake.blabber.impl.common.illustrations.DialogueIllustrationCollection;
 import org.ladysnake.blabber.impl.common.illustrations.PositionTransform;
 
-public class TextureIllustrationRenderer extends DialogueIllustrationRenderer<DialogueIllustrationTexture> {
-    public TextureIllustrationRenderer(DialogueIllustrationTexture illustration) {
+import java.util.ArrayList;
+import java.util.List;
+
+public class IllustrationCollectionRenderer extends DialogueIllustrationRenderer<DialogueIllustrationCollection> {
+    private final List<DialogueIllustrationRenderer<?>> elements;
+
+    public IllustrationCollectionRenderer(DialogueIllustrationCollection illustration) {
         super(illustration);
+        this.elements = new ArrayList<>();
+        for (DialogueIllustration element : illustration.elements()) {
+            this.elements.add(BlabberClient.createRenderer(element));
+        }
     }
 
     @Override
     public void render(GuiGraphics context, Font textRenderer, PositionTransform positionTransform, int mouseX, int mouseY, float tickDelta) {
-        context.blit(
-                illustration.texture(),
-                illustration.minX(positionTransform),
-                illustration.minY(positionTransform),
-                illustration.width(),
-                illustration.height(),
-                0,
-                0,
-                illustration.regionWidth().orElse(illustration.width()),
-                illustration.regionHeight().orElse(illustration.height()),
-                illustration.textureWidth().orElse(illustration.width()),
-                illustration.textureHeight().orElse(illustration.height())
-        );
+        for (DialogueIllustrationRenderer<?> i : elements) {
+            i.render(context, textRenderer, positionTransform, mouseX, mouseY, tickDelta);
+        }
     }
 }

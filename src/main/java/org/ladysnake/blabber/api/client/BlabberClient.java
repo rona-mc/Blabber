@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; If not, see <https://www.gnu.org/licenses>.
  */
-package org.ladysnake.blabber.api.client.client;
+package org.ladysnake.blabber.api.client;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -24,9 +24,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import org.ladysnake.blabber.Blabber;
-import org.ladysnake.blabber.api.client.BlabberDialogueScreen;
-import org.ladysnake.blabber.api.client.BlabberScreenRegistry;
-import org.ladysnake.blabber.api.client.client.illustrations.*;
+import org.ladysnake.blabber.api.client.illustrations.*;
 import org.ladysnake.blabber.api.client.illustration.DialogueIllustrationRenderer;
 import org.ladysnake.blabber.api.illustration.DialogueIllustration;
 import org.ladysnake.blabber.api.illustration.DialogueIllustrationType;

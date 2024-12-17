@@ -15,18 +15,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; If not, see <https://www.gnu.org/licenses>.
  */
-package org.ladysnake.blabber.api.client.client.compat;
-
-/*
-import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
-import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
-import me.shedaniel.rei.forge.REIPluginClient;
-
-@REIPluginClient
-public class BlabberReiClientPlugin implements REIClientPlugin {
-    @Override
-    public void registerScreens(ScreenRegistry registry) {
-        registry.registerDecider(new BlabberOverlayDecider());
-    }
-}
+/**
+ * Definitions of the dialogue system
  */
+@FieldsAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+@ApiStatus.Internal
+package org.ladysnake.blabber.api.client;
+
+import net.minecraft.FieldsAreNonnullByDefault;
+import net.minecraft.MethodsReturnNonnullByDefault;
+import org.jetbrains.annotations.ApiStatus;

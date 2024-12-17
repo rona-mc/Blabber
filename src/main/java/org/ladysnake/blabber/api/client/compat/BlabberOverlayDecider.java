@@ -15,28 +15,23 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; If not, see <https://www.gnu.org/licenses>.
  */
-package org.ladysnake.blabber.api.client.client.compat;
+package org.ladysnake.blabber.api.client.compat;
 
 /*
-import mezz.jei.api.IModPlugin;
-import mezz.jei.api.JeiPlugin;
-import mezz.jei.api.registration.IGuiHandlerRegistration;
-import net.minecraft.resources.ResourceLocation;
-import org.ladysnake.blabber.Blabber;
+import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.world.InteractionResult;
 import org.ladysnake.blabber.api.client.BlabberDialogueScreen;
-import org.ladysnake.blabber.impl.client.BlabberRpgDialogueScreen;
 
-@JeiPlugin
-public class BlabberJeiClientPlugin implements IModPlugin {
+public class BlabberOverlayDecider implements OverlayDecider {
     @Override
-    public ResourceLocation getPluginUid() {
-        return Blabber.id("jei_remover");
+    public <R extends Screen> boolean isHandingScreen(Class<R> screen) {
+        return BlabberDialogueScreen.class.isAssignableFrom(screen);
     }
 
     @Override
-    public void registerGuiHandlers(IGuiHandlerRegistration registration) {
-        registration.addGuiScreenHandler(BlabberDialogueScreen.class, s -> null);
-        registration.addGuiScreenHandler(BlabberRpgDialogueScreen.class, s -> null);
+    public <R extends Screen> InteractionResult shouldScreenBeOverlaid(R screen) {
+        return InteractionResult.FAIL;
     }
 }
  */

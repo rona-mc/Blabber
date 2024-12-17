@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; If not, see <https://www.gnu.org/licenses>.
  */
-package org.ladysnake.blabber.api.client.client;
+package org.ladysnake.blabber.api.client;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -25,7 +25,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.player.Inventory;
 import org.joml.Matrix4f;
-import org.ladysnake.blabber.api.client.BlabberDialogueScreen;
 import org.ladysnake.blabber.api.layout.DefaultLayoutParams;
 import org.ladysnake.blabber.api.layout.Margins;
 import org.ladysnake.blabber.impl.common.DialogueScreenHandler;
